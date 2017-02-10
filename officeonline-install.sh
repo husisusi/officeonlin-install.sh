@@ -108,7 +108,7 @@ clear
 echo ""
 echo "You can now check loolwsd.service status using: systemctl status loolwsd.service"
 echo "Your user is admin and password is office1234. You can change your user and/or password in (/lib/systemd/system/loolwsd.service)"
-echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I need to (make run) in /opt/online folder. Enjoy!!!"
+echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I will start the service. Enjoy!!!"
 
 sleep 10
 echo ""
