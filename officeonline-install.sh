@@ -113,7 +113,7 @@ echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 sleep 10
 echo ""
 echo "DONE!"
-echo "please change lool password"
+echo "please change lool password: justofficeuser"
 echo ""
 
 echo "justofficeuser" > /tmp/pass
