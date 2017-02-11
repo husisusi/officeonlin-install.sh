@@ -69,7 +69,7 @@ sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$oo" && libtoolize && aclocal
 for dir in ./*/ ; do (cd "$oo" && npm install -g npm); done
 for dir in ./*/ ; do (cd "$oo" && npm install -g jake); done
 
-for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j4 --directory=$oo); done
+for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done
 for dir in ./*/ ; do ( cd "$oo" && make install); done
 
 
@@ -102,7 +102,7 @@ openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.
 
 systemctl enable loolwsd.service
 #systemctl start loolwsd.service
-
+chown lool:lool $oo -R
 clear
 
 echo ""
