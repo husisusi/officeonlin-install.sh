@@ -1,6 +1,7 @@
 
 #!/bin/bash
 
+#VERSION 1.0
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -34,16 +35,12 @@ useradd lool -G sudo
 mkdir /home/lool
 chown lool:lool /home/lool -R
 
-chpasswd << 'END'
-lool:justofficeuser
-END
-
 
 git clone https://github.com/LibreOffice/core $ooo
 chown lool:lool $ooo -R
 
 
-#sed -i 's;=realpath(cwd());="/opt/libreoffice";g' $ooo/autogen.sh
+
 sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && $ooo/autogen.sh --without-help --without-myspell-dicts); done"
 sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && make); done"
 sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && make check); done"
@@ -53,7 +50,7 @@ sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && make check); done"
 wget https://pocoproject.org/releases/poco-1.7.7/$getpoko -P /opt/
 tar xf /opt/$getpoko -C  /opt/
 chown lool:lool $poco -R
-########sed -i "s;build=\`pwd\`;build=$poco;g" $poco/configure
+
 sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$poco" && ./configure); done"
 sudo -H -u lool bash -c  "for dir in ./*/ ; do (cd "$poco" && make -j$cpu); done"
 for dir in ./*/ ; do (cd "$poco" && make install); done
@@ -73,6 +70,9 @@ for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-loki
 for dir in ./*/ ; do ( cd "$oo" && make install); done
 
 
+echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
+
+
 chown lool:lool /opt/* -R
 mkdir -p /usr/local/var/cache/loolwsd
 chown -R lool:lool /usr/local/var/cache/loolwsd
@@ -85,7 +85,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/loolwsd
-ExecStart=/opt/online/loolwsd --version --o:sys_template_path="/opt/online/systemplate" --o:lo_template_path="/opt/libreoffice/instdir"  --o:child_root_path="/opt/online/jails" --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=office1234
+ExecStart=/opt/online/loolwsd --version --o:sys_template_path="/opt/online/systemplate" --o:lo_template_path="/opt/libreoffice/instdir"  --o:child_root_path="/opt/online/jails" --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.passwo$
 User=lool
 KillMode=control-group
 Restart=always
@@ -108,16 +108,16 @@ clear
 echo ""
 echo "You can now check loolwsd.service status using: systemctl status loolwsd.service"
 echo "Your user is admin and password is office1234. You can change your user and/or password in (/lib/systemd/system/loolwsd.service)"
-echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I will start the service. Enjoy!!!"
+echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I will start the service."
 
 sleep 10
-echo ""
-echo "DONE!"
-echo "please change lool password: justofficeuser"
-echo ""
 
-echo "justofficeuser" > /tmp/pass
-sudo -H -u lool bash -c "for dir in ./*/ ; do ( cd "$oo" && make run < /tmp/pass ); done"
 
+sudo -H -u lool bash -c "for dir in ./*/ ; do ( cd "$oo" && make run & ); done"
+
+sleep 5
+sed -i '$d' /etc/sudoers
+echo ""
+echo "DONE! Enjoy!!!"
+echo ""
 exit
-
