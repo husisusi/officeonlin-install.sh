@@ -29,7 +29,7 @@ sed -i 's/# deb-src/deb-src/g' $soli
 
 apt-get update && apt-get upgrade -y
 
-apt-get install git libkrb5-dev make openssl apache2 g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy letsencrypt python-letsencrypt-apache libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+apt-get install sudo libegl1-mesa-dev libkrb5-dev git libkrb5-dev make openssl apache2 g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
 useradd lool -G sudo
 mkdir /home/lool
@@ -85,7 +85,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/loolwsd
-ExecStart=/opt/online/loolwsd --version --o:sys_template_path="/opt/online/systemplate" --o:lo_template_path="/opt/libreoffice/instdir"  --o:child_root_path="/opt/online/jails" --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=office1234
+ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=office1234
 User=lool
 KillMode=control-group
 Restart=always
