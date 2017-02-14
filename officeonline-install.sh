@@ -22,6 +22,9 @@ poco="/opt/poco-1.7.7-all"
 getpoko=poco-1.7.7-all.tar.gz
 oo="/opt/online"
 cpu=`nproc`
+maxcon=200
+maxdoc=100
+
 
 if [[ `id -u` -ne 0 ]] ; then echo "Please run me as root or sudo ./officeonline-install.sh" ; exit 1 ; fi
 
@@ -66,7 +69,7 @@ sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$oo" && libtoolize && aclocal
 for dir in ./*/ ; do (cd "$oo" && npm install -g npm); done
 for dir in ./*/ ; do (cd "$oo" && npm install -g jake); done
 
-for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done
+for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done
 for dir in ./*/ ; do ( cd "$oo" && make install); done
 
 
@@ -121,3 +124,4 @@ echo ""
 echo "DONE! Enjoy!!!"
 echo ""
 exit
+
