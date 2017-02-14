@@ -1,5 +1,5 @@
 # officeonlin-install.sh
-Script to install Office Online on Ubuntu 16.04 
+Script to install Office Online on Ubuntu 16.04 and Debian 8.7 
 
 
 Written by: Subhi H.<br>
