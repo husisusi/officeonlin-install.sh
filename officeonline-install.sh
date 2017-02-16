@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.0
+#VERSION 1.1
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -32,7 +32,7 @@ sed -i 's/# deb-src/deb-src/g' $soli
 
 apt-get update && apt-get upgrade -y
 
-apt-get install sudo libegl1-mesa-dev libkrb5-dev git libkrb5-dev make openssl apache2 g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+apt-get install sudo libegl1-mesa-dev libkrb5-dev python-polib git libkrb5-dev make openssl apache2 g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
 useradd lool -G sudo
 mkdir /home/lool
