@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.1
+#VERSION 1.2
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -44,9 +44,9 @@ chown lool:lool $ooo -R
 
 
 
-sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && $ooo/autogen.sh --without-help --without-myspell-dicts); done"
-sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && make); done"
-sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$ooo" && make check); done"
+sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && $ooo/autogen.sh --without-help --without-myspell-dicts); done"
+sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done"
+sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make check); done"
 
 
 ######TODO###### We need autocheck last version of pocp and link it to $getpoko   
@@ -54,9 +54,9 @@ wget https://pocoproject.org/releases/poco-1.7.7/$getpoko -P /opt/
 tar xf /opt/$getpoko -C  /opt/
 chown lool:lool $poco -R
 
-sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$poco" && ./configure); done"
-sudo -H -u lool bash -c  "for dir in ./*/ ; do (cd "$poco" && make -j$cpu); done"
-for dir in ./*/ ; do (cd "$poco" && make install); done
+sudo -H -u lool bash -c "for dir in ./ ; do (cd "$poco" && ./configure); done"
+sudo -H -u lool bash -c  "for dir in ./ ; do (cd "$poco" && make -j$cpu); done"
+for dir in ./ ; do (cd "$poco" && make install); done
 
 ###############################################################################
 
@@ -64,13 +64,13 @@ for dir in ./*/ ; do (cd "$poco" && make install); done
 git clone https://github.com/LibreOffice/online $oo
 
 chown lool:lool $oo -R
-sudo -H -u lool bash -c "for dir in ./*/ ; do (cd "$oo" && libtoolize && aclocal && autoheader && automake --add-missing && autoreconf); done"
+sudo -H -u lool bash -c "for dir in ./ ; do (cd "$oo" && libtoolize && aclocal && autoheader && automake --add-missing && autoreconf); done"
 
-for dir in ./*/ ; do (cd "$oo" && npm install -g npm); done
-for dir in ./*/ ; do (cd "$oo" && npm install -g jake); done
+for dir in ./ ; do (cd "$oo" && npm install -g npm); done
+for dir in ./ ; do (cd "$oo" && npm install -g jake); done
 
-for dir in ./*/ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done
-for dir in ./*/ ; do ( cd "$oo" && make install); done
+for dir in ./ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done
+for dir in ./ ; do ( cd "$oo" && make install); done
 
 
 echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
@@ -116,7 +116,7 @@ echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 sleep 10
 
 
-sudo -H -u lool bash -c "for dir in ./*/ ; do ( cd "$oo" && make run & ); done"
+sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
 
 sleep 5
 sed -i '$d' /etc/sudoers
