@@ -123,5 +123,6 @@ sed -i '$d' /etc/sudoers
 echo ""
 echo "DONE! Enjoy!!!"
 echo ""
+lsof -i :9980
 exit
 
