@@ -75,8 +75,8 @@ for dir in ./ ; do ( cd "$oo" && make install); done
 
 echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
 
+chown -R lool:lool {$ooo,$poco,$oo}
 
-chown lool:lool /opt/* -R
 mkdir -p /usr/local/var/cache/loolwsd
 chown -R lool:lool /usr/local/var/cache/loolwsd
 
