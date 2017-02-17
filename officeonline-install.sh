@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.2
+#VERSION 1.3
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -109,7 +109,7 @@ chown lool:lool $oo -R
 clear
 
 echo ""
-echo "You can now check loolwsd.service status using: systemctl status loolwsd.service"
+echo "You can after reboot check loolwsd.service status using: systemctl status loolwsd.service"
 echo "Your user is admin and password is office1234. You can change your user and/or password in (/lib/systemd/system/loolwsd.service)"
 echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I will start the service."
 
