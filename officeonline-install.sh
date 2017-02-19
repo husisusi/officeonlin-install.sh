@@ -1,20 +1,16 @@
 
 #!/bin/bash
 
-#VERSION 1.3
+#VERSION 1.2
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 #This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
+if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
+
 clear
-echo ""
-echo ""
-echo ""
-echo "The installation will start in 15 sec.I hope you started it as root or with sudo ;)"
-echo "THE INSTALLATION WILL TAKE REALLY VERY LONG TIME SO BE PATIENT PLEASE!!! You may eventually see errors during the installation, just ignore them."
-sleep 15
 
 soli="/etc/apt/sources.list"
 ooo="/opt/libreoffice"
@@ -25,12 +21,18 @@ cpu=`nproc`
 maxcon=200
 maxdoc=100
 
+apt-get update && apt-get install dialog
 
-if [[ `id -u` -ne 0 ]] ; then echo "Please run me as root or sudo ./officeonline-install.sh" ; exit 1 ; fi
+
+dialog --backtitle "Information" \
+--title "Note" \
+--msgbox 'THE INSTALLATION WILL TAKE REALLY VERY LONG TIME, 2-8 HOURS (It depends on the speed of your serve), SO BE PATIENT PLEASE!!! You may see errors during the installation, just ignore them and let it do the work.' 10 78
+
+clear
 
 sed -i 's/# deb-src/deb-src/g' $soli
 
-apt-get update && apt-get upgrade -y
+apt-get upgrade -y
 
 apt-get install sudo libegl1-mesa-dev libkrb5-dev python-polib git libkrb5-dev make openssl apache2 g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
@@ -97,6 +99,7 @@ Restart=always
 WantedBy=multi-user.target
 
 EOT
+
 mkdir /etc/loolwsd
 openssl genrsa -out /etc/loolwsd/key.pem 4096
 openssl req -out /etc/loolwsd/cert.csr -key /etc/loolwsd/key.pem -new -sha256 -nodes -subj "/C=DE/OU=onlineoffice-install.com/CN=onlineoffice-install.com/emailAddress=nomail@nodo.com"
@@ -106,15 +109,15 @@ openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.
 systemctl enable loolwsd.service
 #systemctl start loolwsd.service
 chown lool:lool $oo -R
+
+dialog --backtitle "Information" \
+--title "Note" \
+--msgbox 'You can after reboot use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
+Your user is admin and password is office1234. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),
+after that run (systemctl daemon-reload && systemctl restart loolwsd.service). Please press OK and wait 10 sec. I will start the service.' 10 145
+
+
 clear
-
-echo ""
-echo "You can after reboot check loolwsd.service status using: systemctl status loolwsd.service"
-echo "Your user is admin and password is office1234. You can change your user and/or password in (/lib/systemd/system/loolwsd.service)"
-echo "then run (systemctl daemon-reload && systemctl restart loolwsd.service). Please wait 10 sec. I will start the service."
-
-sleep 10
-
 
 sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
 
