@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.3
+#VERSION 1.4
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -127,10 +127,10 @@ clear
 sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
 
 sleep 10
+
 sed -i '$d' /etc/sudoers
-echo ""
-echo "DONE! Enjoy!!!"
-echo ""
+ps -ef | grep loolwsd | grep -v grep
+[ $?  -eq "0" ] && echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m" || echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in /tmp/officeonline.log ###\033[0m"
 lsof -i :9980
 exit
 
