@@ -36,7 +36,7 @@ sed -i 's/# deb-src/deb-src/g' $soli
 
 apt-get upgrade -y
 
-apt-get install sudo libegl1-mesa-dev libkrb5-dev python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+apt-get install sudo libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
 useradd lool -G sudo
 mkdir /home/lool
@@ -53,7 +53,6 @@ chown lool:lool $ooo -R
 
 sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && $ooo/autogen.sh --without-help --without-myspell-dicts); done" | tee -a $log_file
 sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done" | tee -a $log_file
-#sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make check); done"
 
 
 ######TODO###### We need autocheck last version of pocp and link it to $getpoko   
@@ -111,6 +110,7 @@ openssl req -out /etc/loolwsd/cert.csr -key /etc/loolwsd/key.pem -new -sha256 -n
 openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/cert.pem
 openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/ca-chain.cert.pem
 
+ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
 systemctl enable loolwsd.service
 
 
