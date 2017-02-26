@@ -36,7 +36,7 @@ sed -i 's/# deb-src/deb-src/g' $soli
 
 apt-get upgrade -y
 
-apt-get install sudo libegl1-mesa-dev libkrb5-dev python-polib git libkrb5-dev make openssl libopenjp2-tools g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+apt-get install sudo libegl1-mesa-dev libkrb5-dev python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
 useradd lool -G sudo
 mkdir /home/lool
