@@ -10,6 +10,10 @@
 
 if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 
+apt install python-pip
+pip install --upgrade pip apt-select
+apt-select
+
 clear
 
 soli="/etc/apt/sources.list"
