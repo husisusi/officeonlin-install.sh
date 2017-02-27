@@ -16,8 +16,8 @@ soli="/etc/apt/sources.list"
 log_file="/tmp/officeonline.log"
 ood=libreoffice-5.3.0.3
 ooo="/opt/libreoffice"
-poco="/opt/poco-1.7.7-all"
-getpoko=poco-1.7.7-all.tar.gz
+poco="/opt/poco-1.7.8-all"
+getpoko=poco-1.7.8-all.tar.gz
 oo="/opt/online"
 cpu=`nproc`
 maxcon=200
@@ -34,7 +34,7 @@ clear
 
 sed -i 's/# deb-src/deb-src/g' $soli
 
-apt-get upgrade -y
+apt-get update && apt-get upgrade -y
 
 apt-get install sudo libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
 
@@ -56,7 +56,7 @@ sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done" | tee -a 
 
 
 ######TODO###### We need autocheck last version of pocp and link it to $getpoko   
-wget https://pocoproject.org/releases/poco-1.7.7/$getpoko -P /opt/
+wget https://pocoproject.org/releases/poco-1.7.8/$getpoko -P /opt/
 tar xf /opt/$getpoko -C  /opt/
 chown lool:lool $poco -R
 
