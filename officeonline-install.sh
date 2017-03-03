@@ -10,6 +10,14 @@
 
 if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 
+echo "Checking for the best mirror available"
+apt install python-pip
+pip install --upgrade pip apt-select
+apt-select
+cp /etc/apt/sources.list /etc/apt/sources.list.backup
+mv sources.list /etc/apt/
+apt update -qq
+
 clear
 
 soli="/etc/apt/sources.list"
