@@ -14,6 +14,6 @@ You might encounter errors during the installation, just ignore them.
 
 It will install libreoffice in ```/opt/libreoffice```, Poco in ```/opt/poco``` and onlineOffice in ```/opt/online```
 
-Your can manage your service usiny systemd: ```systemctl start|stop|restart loolwsd.service```
+Your can manage your service using systemd: ```systemctl start|stop|restart|status loolwsd.service```
 
 Enjoy!!!
