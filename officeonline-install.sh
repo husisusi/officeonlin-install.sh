@@ -54,7 +54,7 @@ sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done" | tee -a 
 
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco="/opt/poco-${poco_version}-all"
-[ -f /opt/${poco_version}-all.tar.gz ] || wget https://pocoproject.org/releases/poco-${poco_version}/${poco_version}-all.tar.gz -P /opt/
+[ -f /opt/${poco_version}-all.tar.gz ] || wget https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/
 tar xf /opt/${poco_version}-all.tar.gz -C  /opt/
 chown lool:lool $poco -R
 
