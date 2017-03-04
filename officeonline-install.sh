@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.4
+#VERSION 1.5
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -19,7 +19,6 @@ clear
 
 soli="/etc/apt/sources.list"
 log_file="/tmp/officeonline.log"
-ood="libreoffice-5.3.0.3"
 ooo="/opt/libreoffice"
 oo="/opt/online"
 cpu=$(nproc)
@@ -43,9 +42,10 @@ apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
-[ -f /opt/${ood}.tar.xz ] || wget http://download.documentfoundation.org/libreoffice/src/5.3.0/${ood}.tar.xz -P /opt/
-tar xf /opt/${ood}.tar.xz -C  /opt/
-mv /opt/$ood $ooo
+lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.0/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+[ -f /opt/$lo_version ] || wget http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
+tar xf /opt/$lo_version.tar.xz -C  /opt/
+mv /opt/$lo_version $ooo
 
 chown lool:lool $ooo -R
 
@@ -119,7 +119,7 @@ after that run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 clear
 
 sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
-
+rm -rf /opt/libreoffice/workdir
 sleep 10
 
 sed -i '$d' /etc/sudoers
