@@ -35,15 +35,19 @@ clear
 
 sed -i 's/# deb-src/deb-src/g' $soli
 
+
 apt-get update && apt-get upgrade -y
 
-apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config npm wget nodejs-legacy libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev  -y && sudo apt-get build-dep libreoffice -y
+
+curl -sL https://deb.nodesource.com/setup_6.x | bash -
+apt-get install nodejs
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
 lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.0/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-[ -f /opt/$lo_version ] || wget http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
+[ -f /opt/$lo_version.xz ] || wget http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
 tar xf /opt/$lo_version.tar.xz -C  /opt/
 mv /opt/$lo_version $ooo
 
