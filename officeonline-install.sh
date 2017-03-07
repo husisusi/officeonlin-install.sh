@@ -47,7 +47,7 @@ getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
 lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.0/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-[ -f /opt/$lo_version.xz ] || wget http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
+wget -c http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
 tar xf /opt/$lo_version.tar.xz -C  /opt/
 mv /opt/$lo_version $ooo
 
@@ -58,7 +58,7 @@ sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done" | tee -a 
 
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco="/opt/poco-${poco_version}-all"
-[ -f /opt/${poco_version}-all.tar.gz ] || wget https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/
+wget -c https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/
 tar xf /opt/poco-${poco_version}-all.tar.gz -C  /opt/
 chown lool:lool $poco -R
 
