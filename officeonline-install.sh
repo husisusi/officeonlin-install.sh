@@ -116,7 +116,7 @@ systemctl enable loolwsd.service
 
 dialog --backtitle "Information" \
 --title "Note" \
---msgbox 'The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
+--msgbox 'The installation log file is in '"${log_file}"'. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
 Your user is admin and password is '"$PASSWORD"'. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),
 after that run (systemctl daemon-reload && systemctl restart loolwsd.service). Please press OK and wait 15 sec. I will start the service.' 10 145
 
