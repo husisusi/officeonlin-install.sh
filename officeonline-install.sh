@@ -96,7 +96,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/loolwsd
-ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password="$PASSWORD"
+ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
 User=lool
 KillMode=control-group
 Restart=always
