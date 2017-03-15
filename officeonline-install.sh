@@ -76,7 +76,7 @@ sudo -H -u lool bash -c "for dir in ./ ; do (cd "$oo" && libtoolize && aclocal &
 for dir in ./ ; do (cd "$oo" && npm install -g npm); done
 for dir in ./ ; do (cd "$oo" && npm install -g jake); done
 
-for dir in ./ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=/opt/online/bundled/include --with-lo-path=/opt/libreoffice/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done | tee -a $log_file
+for dir in ./ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done | tee -a $log_file
 for dir in ./ ; do ( cd "$oo" && make install); done | tee -a $log_file
 
 echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
@@ -99,7 +99,7 @@ EnvironmentFile=-/etc/sysconfig/loolwsd
 ExecStartPre=/bin/mkdir -p /usr/local/var/cache/loolwsd
 ExecStartPre=/bin/chown lool: /usr/local/var/cache/loolwsd
 PermissionsStartOnly=true
-ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
+ExecStart=${oo}/loolwsd --o:sys_template_path=${oo}/systemplate --o:lo_template_path=${ooo}/instdir  --o:child_root_path=${oo}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
 User=lool
 KillMode=control-group
 Restart=always
@@ -126,12 +126,12 @@ after that run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 clear
 
 sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
-rm -rf /opt/libreoffice/workdir
+rm -rf ${ooo}/workdir
 echo "Please wait, I am checking if lool service is running...."
 sleep 17
 
 sed -i '$d' /etc/sudoers
 ps -ef | grep loolwsd | grep -v grep
-[ $?  -eq "0" ] && echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m" || echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in /tmp/officeonline.log ###\033[0m"
+[ $?  -eq "0" ] && echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m" || echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
 lsof -i :9980
 exit
