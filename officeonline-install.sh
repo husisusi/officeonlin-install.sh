@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-#VERSION 1.5
+#VERSION 1.5.1
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -96,7 +96,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/loolwsd
-ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password="$PASSWORD"
+ExecStart=/opt/online/loolwsd --o:sys_template_path=/opt/online/systemplate --o:lo_template_path=/opt/libreoffice/instdir  --o:child_root_path=/opt/online/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
 User=lool
 KillMode=control-group
 Restart=always
@@ -116,7 +116,7 @@ systemctl enable loolwsd.service
 
 dialog --backtitle "Information" \
 --title "Note" \
---msgbox 'The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
+--msgbox 'The installation log file is in '"${log_file}"'. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
 Your user is admin and password is '"$PASSWORD"'. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),
 after that run (systemctl daemon-reload && systemctl restart loolwsd.service). Please press OK and wait 15 sec. I will start the service.' 10 145
 
@@ -124,7 +124,8 @@ clear
 
 sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
 rm -rf /opt/libreoffice/workdir
-sleep 10
+echo "Please wait, I am checking if lool service is running...."
+sleep 17
 
 sed -i '$d' /etc/sudoers
 ps -ef | grep loolwsd | grep -v grep
