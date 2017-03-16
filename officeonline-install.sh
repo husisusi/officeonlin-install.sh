@@ -3,10 +3,15 @@
 
 #VERSION 1.5.1
 #Written by: Subhi H.
-#This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#This script is free software: you can redistribute it and/or modify it under
+#the terms of the GNU General Public License as published by the Free Software
+#Foundation, either version 3 of the License, or (at your option) any later version.
 
-#This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+#This script is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#You should have received a copy of the GNU General Public License along with
+#this program. If not, see http://www.gnu.org/licenses/.
 
 if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 
@@ -30,7 +35,6 @@ apt-get update && apt-get -y install dialog
 dialog --backtitle "Information" \
 --title "Note" \
 --msgbox 'THE INSTALLATION WILL TAKE REALLY VERY LONG TIME, 2-8 HOURS (It depends on the speed of your server), SO BE PATIENT PLEASE!!! You may see errors during the installation, just ignore them and let it do the work.' 10 78
-
 clear
 
 sed -i 's/# deb-src/deb-src/g' $soli
