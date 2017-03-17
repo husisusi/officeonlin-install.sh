@@ -93,13 +93,14 @@ echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
 
 chown -R lool:lool {$ooo,$poco,$oo}
 
-mkdir -p /usr/local/var/cache/loolwsd
-chown -R lool:lool /usr/local/var/cache/loolwsd
 
 PASSWORD=$(randpass 10 0)
 
-cat <<EOT > /lib/systemd/system/loolwsd.service
+mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
 
+if [ ! -f /lib/systemd/system/loolwsd.service ]; then
+  PASSWORD=$(randpass 10 0)
+  cat <<EOT > /lib/systemd/system/loolwsd.service
 [Unit]
 Description=LibreOffice OnLine WebSocket Daemon
 After=network.target
@@ -117,6 +118,7 @@ KillMode=control-group
 [Install]
 WantedBy=multi-user.target
 EOT
+fi
 
 if [ ! -f /etc/loolwsd/ca-chain.cert.pem ]; then
   mkdir /etc/loolwsd
