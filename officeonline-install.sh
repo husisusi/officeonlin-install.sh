@@ -26,6 +26,7 @@ oo="/opt/online"
 cpu=$(nproc)
 maxcon=200
 maxdoc=100
+forcebuild_ooo=false
 
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
@@ -58,10 +59,13 @@ if [ ! -f ${ooo}/autogen.sh ]; then
   chown lool:lool $ooo -R
 fi
 
+if [ ! -d ${ooo}/instdir ] || ${forcebuild_ooo}; then
+sudo -u lool bash -c "cd ${ooo} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
+sudo -u lool bash -c "cd ${ooo} && make" | tee -a $log_file
+fi
+
 ###############################################################################
 
-sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && $ooo/autogen.sh --without-help --without-myspell-dicts); done" | tee -a $log_file
-sudo -H -u lool bash -c "for dir in ./ ; do (cd "$ooo" && make); done" | tee -a $log_file
 
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco="/opt/poco-${poco_version}-all"
@@ -72,9 +76,11 @@ if [ ! -d $poco ]; then
   chown lool:lool $poco -R
 fi
 
-sudo -H -u lool bash -c "for dir in ./ ; do (cd "$poco" && ./configure); done" | tee -a $log_file
-sudo -H -u lool bash -c  "for dir in ./ ; do (cd "$poco" && make -j$cpu); done" | tee -a $log_file
-for dir in ./ ; do (cd "$poco" && make install); done | tee -a $log_file
+######## Poco Build ########
+cd "$poco"
+sudo -u lool ./configure | tee -a $log_file
+sudo -u lool make -j${cpu} | tee -a $log_file
+make install | tee -a $log_file
 
 ###############################################################################
 
