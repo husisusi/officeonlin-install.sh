@@ -27,6 +27,7 @@ cpu=$(nproc)
 maxcon=200
 maxdoc=100
 forcebuild_ooo=false
+forcebuild_oo=true
 
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
@@ -84,25 +85,46 @@ make install | tee -a $log_file
 
 ###############################################################################
 
-git clone https://github.com/husisusi/online $oo
-
-chown lool:lool $oo -R
-sudo -H -u lool bash -c "for dir in ./ ; do (cd "$oo" && libtoolize && aclocal && autoheader && automake --add-missing && autoreconf); done"
-
-for dir in ./ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done | tee -a $log_file
-for dir in ./ ; do ( cd "$oo" && make install); done | tee -a $log_file
-
-echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
-
-chown -R lool:lool {$ooo,$poco,$oo}
-
-
-PASSWORD=$(randpass 10 0)
+######## loolwsd Build ########
+cd ${oo}
+#### Download dependencies ####
+if [ ! -d $oo ]; then
+  git clone https://github.com/husisusi/online $oo
+  chown lool:lool $oo -R
+fi
 
 if ! npm -g list jake >/dev/null; then
   npm install -g npm
   npm install -g jake
 fi
+#####################
+### add temporary lool user to sudoers for loolwsd build ###
+# first check if lool group is in sudoers
+# or in the includedir directory if it's used
+if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
+  if ! grep -q '#includedir' /etc/sudoers; then
+    #dirty modification
+    echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers.d
+  else
+    includedir=$(grep '#includedir' /etc/sudoers | awk '{print $NF}')
+    grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
+  fi
+fi
+#####################
+#### loolwsd Build process ##
+[ -f ${oo}/loolwsd ] || ${forcebuild_oo} && make clean
+sudo -u lool ./autogen.sh
+sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug" | tee -a $log_file
+sudo -u lool bash -c "make -j$cpu --directory=$oo" | tee -a $log_file
+
+### remove lool group from sudoers
+if [ -f /etc/sudoers ]; then
+  sed -i '/^\%lool /d' /etc/sudoers
+  rm $(grep -l '%lool' ${includedir})
+fi
+#####################
+#### loolwsd Installation ###
+make install | tee -a $log_file
 mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
 
 if [ ! -f /lib/systemd/system/loolwsd.service ]; then
@@ -152,7 +174,6 @@ rm -rf ${ooo}/workdir
 echo "Please wait, I am checking if lool service is running...."
 sleep 17
 
-sed -i '$d' /etc/sudoers
 ps -ef | grep loolwsd | grep -v grep
 [ $?  -eq "0" ] && echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m" || echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
 lsof -i :9980
