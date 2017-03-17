@@ -46,8 +46,8 @@ apt-get install nodejs -y
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
-lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.0/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-wget -c http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
+lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.1/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+wget -c http://download.documentfoundation.org/libreoffice/src/5.3.1/$lo_version.tar.xz -P /opt/
 tar xf /opt/$lo_version.tar.xz -C  /opt/
 mv /opt/$lo_version $ooo
 
