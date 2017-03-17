@@ -158,7 +158,6 @@ if [ ! -f /etc/loolwsd/ca-chain.cert.pem ]; then
 fi
 if [! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
-  systemctl enable loolwsd.service
 fi
 ### Testing loolwsd ###
 dialog --backtitle "Information" \
@@ -169,12 +168,17 @@ after that run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 
 clear
 
-sudo -H -u lool bash -c "for dir in ./ ; do ( cd "$oo" && make run & ); done"
+sudo -u lool bash -c "${oo}/loolwsd --o:sys_template_path=${oo}/systemplate --o:lo_template_path=${ooo}/instdir  --o:child_root_path=${oo}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${ooo}/workdir
-echo "Please wait, I am checking if lool service is running...."
-sleep 17
-
-ps -ef | grep loolwsd | grep -v grep
-[ $?  -eq "0" ] && echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m" || echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
+sleep 10
+ps -u lool | grep loolwsd
+if [ $?  -eq "0" ]; then
+  echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m"
+  ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
+  systemctl start loolwsd
+  systemctl enable loolwsd.service
+else
+  echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
+fi
 lsof -i :9980
 exit
