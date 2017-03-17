@@ -1,6 +1,4 @@
-
 #!/bin/bash
-
 #VERSION 1.5.1
 #Written by: Subhi H.
 #This script is free software: you can redistribute it and/or modify it under
@@ -19,7 +17,6 @@ randpass() {
   [ "$2" == "0" ] && CHAR="[:alnum:]" || CHAR="[:graph:]"
   cat /dev/urandom 2>/dev/null | tr -cd "$CHAR" 2>/dev/null | head -c ${1:-32}
 }
-
 clear
 
 soli="/etc/apt/sources.list"
@@ -30,8 +27,10 @@ cpu=$(nproc)
 maxcon=200
 maxdoc=100
 
-apt-get update && apt-get -y install dialog
+# run apt update && upgrade if last update is older than 1 day
+find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
+apt-get install dialog -y
 dialog --backtitle "Information" \
 --title "Note" \
 --msgbox 'THE INSTALLATION WILL TAKE REALLY VERY LONG TIME, 2-8 HOURS (It depends on the speed of your server), SO BE PATIENT PLEASE!!! You may see errors during the installation, just ignore them and let it do the work.' 10 78
