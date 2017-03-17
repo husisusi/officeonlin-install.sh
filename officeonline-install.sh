@@ -89,9 +89,6 @@ git clone https://github.com/husisusi/online $oo
 chown lool:lool $oo -R
 sudo -H -u lool bash -c "for dir in ./ ; do (cd "$oo" && libtoolize && aclocal && autoheader && automake --add-missing && autoreconf); done"
 
-for dir in ./ ; do (cd "$oo" && npm install -g npm); done
-for dir in ./ ; do (cd "$oo" && npm install -g jake); done
-
 for dir in ./ ; do ( cd "$oo" && ./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug && make -j$cpu --directory=$oo); done | tee -a $log_file
 for dir in ./ ; do ( cd "$oo" && make install); done | tee -a $log_file
 
@@ -102,6 +99,10 @@ chown -R lool:lool {$ooo,$poco,$oo}
 
 PASSWORD=$(randpass 10 0)
 
+if ! npm -g list jake >/dev/null; then
+  npm install -g npm
+  npm install -g jake
+fi
 mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
 
 if [ ! -f /lib/systemd/system/loolwsd.service ]; then
