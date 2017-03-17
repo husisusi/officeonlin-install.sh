@@ -19,6 +19,7 @@ randpass() {
 }
 clear
 
+# lo_major_v=5.3.1
 soli="/etc/apt/sources.list"
 log_file="/tmp/officeonline.log"
 ooo="/opt/libreoffice"
@@ -53,8 +54,9 @@ getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
 if [ ! -f ${ooo}/autogen.sh ]; then
-  lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/5.3.0/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-  [ ! -f $lo_version.tar.xz ] && wget -c http://download.documentfoundation.org/libreoffice/src/5.3.0/$lo_version.tar.xz -P /opt/
+  [ -z "${lo_major_v}" ] && lo_major_v=$(curl -s http://download.documentfoundation.org/libreoffice/src/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s http://download.documentfoundation.org/libreoffice/src/${lo_major_v}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+  [ ! -f $lo_version.tar.xz ] && wget -c http://download.documentfoundation.org/libreoffice/src/${lo_major_v}/$lo_version.tar.xz -P /opt/
   [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
   mv /opt/$lo_version $ooo
   chown lool:lool $ooo -R
