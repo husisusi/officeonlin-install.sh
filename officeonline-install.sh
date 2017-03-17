@@ -86,9 +86,7 @@ sudo -u lool make -j${cpu} | tee -a $log_file
 make install | tee -a $log_file
 
 ###############################################################################
-
 ######## loolwsd Build ########
-cd ${oo}
 #### Download dependencies ####
 if [ ! -d $oo ]; then
   git clone https://github.com/husisusi/online $oo
@@ -114,6 +112,7 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
 fi
 #####################
 #### loolwsd Build process ##
+cd ${oo}
 [ -f ${oo}/loolwsd ] || ${forcebuild_oo} && make clean
 sudo -u lool ./autogen.sh
 sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug" | tee -a $log_file
