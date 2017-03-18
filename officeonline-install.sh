@@ -107,7 +107,7 @@ fi
 if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
   if ! grep -q '#includedir' /etc/sudoers; then
     #dirty modification
-    echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers.d
+    echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
   else
     includedir=$(grep '#includedir' /etc/sudoers | awk '{print $NF}')
     grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
