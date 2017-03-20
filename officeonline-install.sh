@@ -97,7 +97,8 @@ fi
 ######## Poco Build ########
 ## test if the poco poco has already been compiled
 # (the dir size should be around 450000ko vs 65000ko when no compilation)
-if [ $(du -s ${poco} | awk '{print $1}') -gt 100000 ]; then
+# so lets say arbitrary : do compilation when folder size is less than 100Mo
+if [ $(du -s ${poco} | awk '{print $1}') -lt 100000 ]; then
   cd "$poco"
   sudo -u lool ./configure | tee -a $log_file
   sudo -u lool make -j${cpu} | tee -a $log_file
