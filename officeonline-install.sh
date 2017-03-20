@@ -24,6 +24,7 @@ clear
 soli="/etc/apt/sources.list"
 cpu=$(nproc)
 log_file="/tmp/officeonline.log"
+sh_interactive=true
 
 ### LibreOffice parameters ###
 lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
@@ -45,11 +46,7 @@ lool_maxdoc=100
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
-apt-get install dialog -y
-dialog --backtitle "Information" \
---title "Note" \
---msgbox 'THE INSTALLATION WILL TAKE REALLY VERY LONG TIME, 2-8 HOURS (It depends on the speed of your server), SO BE PATIENT PLEASE!!! You may see errors during the installation, just ignore them and let it do the work.' 10 78
-clear
+[ ${lo_forcebuild} ] && apt-get install dialog -y
 
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
@@ -88,8 +85,15 @@ fi
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
-sudo -u lool bash -c "cd ${lo_dir} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
-sudo -u lool bash -c "cd ${lo_dir} && make" | tee -a $log_file
+  if [ ${lo_forcebuild} ]; then
+    dialog --backtitle "Information" \
+    --title "${lo_version} is going to be built" \
+    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((8/${cpu})) HOURS (Depending on your CPU's speed),\n"\
+"SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
+    clear
+  fi
+  sudo -u lool bash -c "cd ${lo_dir} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
+  sudo -u lool bash -c "cd ${lo_dir} && make" | tee -a $log_file
 fi
 
 ###############################################################################
@@ -195,14 +199,14 @@ if [! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
 fi
 ### Testing loolwsd ###
-dialog --backtitle "Information" \
---title "Note" \
---msgbox 'The installation log file is in '"${log_file}"'. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.
-Your user is admin and password is '"$PASSWORD"'. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),
-after that run (systemctl daemon-reload && systemctl restart loolwsd.service). Please press OK and wait 15 sec. I will start the service.' 10 145
-
-clear
-
+if [ ${sh_interactive} ]; then
+  dialog --backtitle "Information" \
+  --title "Note" \
+  --msgbox "The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n"\
+"Your user is admin and password is $PASSWORD. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),\n"\
+"after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\nPlease press OK and wait 15 sec. I will start the service." 10 145
+  clear
+fi
 sudo -u lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${lo_dir}/workdir
 sleep 10
