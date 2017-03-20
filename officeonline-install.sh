@@ -20,6 +20,7 @@ randpass() {
 clear
 
 # lo_major_v=5.3.1
+# lo_version=5.3.1.2
 lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
 soli="/etc/apt/sources.list"
 log_file="/tmp/officeonline.log"
@@ -54,15 +55,28 @@ fi
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 
-if [ ! -f ${ooo}/autogen.sh ]; then
+###############################################################################
+######################## libreoffice compilation ##############################
+#verify what version need to be downloaded if no version has been defined in config
+if [ -z "${lo_version}" ];then
   [ -z "${lo_major_v}" ] && lo_major_v=$(curl -s ${lo_src_repo}/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
   lo_version=$(curl -s ${lo_src_repo}/${lo_major_v}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+fi
+# check is libreoffice sources are already present and in the correct version
+if [ -d ${ooo} ]; then
+  lo_local_version="libreoffice-$(grep 'PACKAGE_VERSION=' ${ooo}/configure | cut -d \' -f 2)"
+  # rename the folder if not in the expected verion
+  [ ${lo_local_version} != ${lo_version} ] && mv ${ooo} ${lo_local_version}
+fi
+# download and extract libreoffice source only if not here
+if [ ! -f ${ooo}/autogen.sh ]; then
   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/${lo_major_v}/$lo_version.tar.xz -P /opt/
   [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
   mv /opt/$lo_version $ooo
   chown lool:lool $ooo -R
 fi
 
+# build LibreOffice if it has'nt been built already or forcebuild_ooo is true
 if [ ! -d ${ooo}/instdir ] || ${forcebuild_ooo}; then
 sudo -u lool bash -c "cd ${ooo} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
 sudo -u lool bash -c "cd ${ooo} && make" | tee -a $log_file
