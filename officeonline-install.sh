@@ -18,20 +18,28 @@ randpass() {
   cat /dev/urandom 2>/dev/null | tr -cd "$CHAR" 2>/dev/null | head -c ${1:-32}
 }
 clear
-
-# lo_major_v=5.3.1
-# lo_version=5.3.1.2
-lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
+###############################################################################
+################################# Parameters ##################################
+### Script parameters ###
 soli="/etc/apt/sources.list"
-log_file="/tmp/officeonline.log"
-ooo="/opt/libreoffice"
-oo="/opt/online"
 cpu=$(nproc)
-maxcon=200
-maxdoc=100
-forcebuild_ooo=false
-forcebuild_oo=true
+log_file="/tmp/officeonline.log"
 
+### LibreOffice parameters ###
+lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
+lo_major_v='' #5.3.1
+lo_version='' #5.3.1.2
+lo_dir="/opt/libreoffice"
+lo_forcebuild=false
+
+### LibreOffice Online parameters ###
+lool_dir="/opt/online"
+lool_forcebuild=false
+lool_maxcon=200
+lool_maxdoc=100
+
+###############################################################################
+############################# System preparation ##############################
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
@@ -63,27 +71,27 @@ if [ -z "${lo_version}" ];then
   lo_version=$(curl -s ${lo_src_repo}/${lo_major_v}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
 fi
 # check is libreoffice sources are already present and in the correct version
-if [ -d ${ooo} ]; then
-  lo_local_version="libreoffice-$(grep 'PACKAGE_VERSION=' ${ooo}/configure | cut -d \' -f 2)"
+if [ -d ${lo_dir} ]; then
+  lo_local_version="libreoffice-$(grep 'PACKAGE_VERSION=' ${lo_dir}/configure | cut -d \' -f 2)"
   # rename the folder if not in the expected verion
-  [ ${lo_local_version} != ${lo_version} ] && mv ${ooo} ${lo_local_version}
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} ${lo_local_version}
 fi
 # download and extract libreoffice source only if not here
-if [ ! -f ${ooo}/autogen.sh ]; then
+if [ ! -f ${lo_dir}/autogen.sh ]; then
   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/${lo_major_v}/$lo_version.tar.xz -P /opt/
   [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
-  mv /opt/$lo_version $ooo
-  chown lool:lool $ooo -R
+  mv /opt/$lo_version ${lo_dir}
+  chown lool:lool ${lo_dir} -R
 fi
 
-# build LibreOffice if it has'nt been built already or forcebuild_ooo is true
-if [ ! -d ${ooo}/instdir ] || ${forcebuild_ooo}; then
-sudo -u lool bash -c "cd ${ooo} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
-sudo -u lool bash -c "cd ${ooo} && make" | tee -a $log_file
+# build LibreOffice if it has'nt been built already or lo_forcebuild is true
+if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
+sudo -u lool bash -c "cd ${lo_dir} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
+sudo -u lool bash -c "cd ${lo_dir} && make" | tee -a $log_file
 fi
 
 ###############################################################################
-
+############################# Poco Installation ###############################
 
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco="/opt/poco-${poco_version}-all"
@@ -105,11 +113,11 @@ if [ $(du -s ${poco} | awk '{print $1}') -lt 100000 ]; then
   make install | tee -a $log_file
 fi
 ###############################################################################
-######## loolwsd Build ########
+########################### loolwsd Installation ##############################
 #### Download dependencies ####
-if [ ! -d $oo ]; then
-  git clone https://github.com/husisusi/online $oo
-  chown lool:lool $oo -R
+if [ ! -d ${lool_dir} ]; then
+  git clone https://github.com/husisusi/online ${lool_dir}
+  chown lool:lool ${lool_dir} -R
 fi
 
 if ! npm -g list jake >/dev/null; then
@@ -130,12 +138,12 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
   fi
 fi
 #####################
-#### loolwsd Build process ##
-cd ${oo}
-[ -f ${oo}/loolwsd ] || ${forcebuild_oo} && make clean
+#### loolwsd Build ##
+cd ${lool_dir}
+[ -f ${lool_dir}/loolwsd ] || ${lool_forcebuild} && make clean
 sudo -u lool ./autogen.sh
-sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${oo}/bundled/include --with-lo-path=${ooo}/instdir --with-max-connections=$maxcon --with-max-documents=$maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug" | tee -a $log_file
-sudo -u lool bash -c "make -j$cpu --directory=$oo" | tee -a $log_file
+sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug" | tee -a $log_file
+sudo -u lool bash -c "make -j$cpu --directory=${lool_dir}" | tee -a $log_file
 
 ### remove lool group from sudoers
 if [ -f /etc/sudoers ]; then
@@ -159,7 +167,7 @@ EnvironmentFile=-/etc/sysconfig/loolwsd
 ExecStartPre=/bin/mkdir -p /usr/local/var/cache/loolwsd
 ExecStartPre=/bin/chown lool: /usr/local/var/cache/loolwsd
 PermissionsStartOnly=true
-ExecStart=${oo}/loolwsd --o:sys_template_path=${oo}/systemplate --o:lo_template_path=${ooo}/instdir  --o:child_root_path=${oo}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
+ExecStart=${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
 User=lool
 KillMode=control-group
 # Restart=always
@@ -188,8 +196,8 @@ after that run (systemctl daemon-reload && systemctl restart loolwsd.service). P
 
 clear
 
-sudo -u lool bash -c "${oo}/loolwsd --o:sys_template_path=${oo}/systemplate --o:lo_template_path=${ooo}/instdir  --o:child_root_path=${oo}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
-rm -rf ${ooo}/workdir
+sudo -u lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
+rm -rf ${lo_dir}/workdir
 sleep 10
 ps -u lool | grep loolwsd
 if [ $?  -eq "0" ]; then
