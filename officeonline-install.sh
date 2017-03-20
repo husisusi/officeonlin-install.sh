@@ -87,12 +87,13 @@ fi
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if [ ${lo_forcebuild} ]; then
     dialog --backtitle "Information" \
-    --title "${lo_version} is going to be built" \
+    --title "${lo_version} is going to be built." \
     --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((8/${cpu})) HOURS (Depending on your CPU's speed),\n"\
 "SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
     clear
   fi
   sudo -u lool bash -c "cd ${lo_dir} && ./autogen.sh --without-help --without-myspell-dicts" | tee -a $log_file
+  # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   sudo -u lool bash -c "cd ${lo_dir} && make" | tee -a $log_file
 fi
 
@@ -116,6 +117,7 @@ if [ $(du -s ${poco} | awk '{print $1}') -lt 100000 ]; then
   cd "$poco"
   sudo -u lool ./configure | tee -a $log_file
   sudo -u lool make -j${cpu} | tee -a $log_file
+  # poco take around 22/${cpu} minutes to compile on fast cpu
   make install | tee -a $log_file
 fi
 ###############################################################################
@@ -131,6 +133,15 @@ if ! npm -g list jake >/dev/null; then
   npm install -g jake
 fi
 #####################
+#####################
+#### loolwsd & loleaflet Build ##
+ # Idempotence : do not recompile loolwsd, install & test if already done
+if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
+  # leave if loowsd is already compiled and lool_forcebuild is not true.
+  echo "Loolwsd is already compiled and I'm not forced to recompile.\nLeaving here..."
+  exit 1
+fi
+
 ### add temporary lool user to sudoers for loolwsd build ###
 # first check if lool group is in sudoers
 # or in the includedir directory if it's used
@@ -143,20 +154,21 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
     grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
   fi
 fi
-#####################
-#### loolwsd Build ##
 cd ${lool_dir}
-[ -f ${lool_dir}/loolwsd ] || ${lool_forcebuild} && make clean
+[ -f ${lool_dir}/loolwsd ] && sudo -u lool make clean
 sudo -u lool ./autogen.sh
 [ -z "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
 sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" | tee -a $log_file
+# loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 sudo -u lool bash -c "make -j$cpu --directory=${lool_dir}" | tee -a $log_file
-
+_loolwsd_make_rc=${?} # get the make return code
 ### remove lool group from sudoers
 if [ -f /etc/sudoers ]; then
   sed -i '/^\%lool /d' /etc/sudoers
   rm $(grep -l '%lool' ${includedir})
 fi
+##leave if make loowsd has failed
+[ ${_loolwsd_make_rc} -ne 0 ] && exit 1
 #####################
 #### loolwsd Installation ###
 make install | tee -a $log_file
@@ -214,7 +226,6 @@ ps -u lool | grep loolwsd
 if [ $?  -eq "0" ]; then
   echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m"
   ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
-  systemctl start loolwsd
   systemctl enable loolwsd.service
 else
   echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
