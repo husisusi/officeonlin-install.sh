@@ -34,6 +34,8 @@ lo_forcebuild=false
 
 ### LibreOffice Online parameters ###
 lool_dir="/opt/online"
+lool_configure_opts='--enable-debug'
+lool_logfile='/var/log/loolwsd.log'
 lool_forcebuild=false
 lool_maxcon=200
 lool_maxdoc=100
@@ -104,8 +106,8 @@ fi
 
 ######## Poco Build ########
 ## test if the poco poco has already been compiled
-# (the dir size should be around 450000ko vs 65000ko when no compilation)
-# so lets say arbitrary : do compilation when folder size is less than 100Mo
+# (the dir size should be around 450000ko vs 65000ko when just extracted)
+# so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ $(du -s ${poco} | awk '{print $1}') -lt 100000 ]; then
   cd "$poco"
   sudo -u lool ./configure | tee -a $log_file
@@ -142,7 +144,8 @@ fi
 cd ${lool_dir}
 [ -f ${lool_dir}/loolwsd ] || ${lool_forcebuild} && make clean
 sudo -u lool ./autogen.sh
-sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib --enable-debug" | tee -a $log_file
+[ -z "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
+sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" | tee -a $log_file
 sudo -u lool bash -c "make -j$cpu --directory=${lool_dir}" | tee -a $log_file
 
 ### remove lool group from sudoers
@@ -154,6 +157,10 @@ fi
 #### loolwsd Installation ###
 make install | tee -a $log_file
 mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
+
+# create log file for lool user
+[ -z "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
+chown lool:lool ${lool_logfile}
 
 if [ ! -f /lib/systemd/system/loolwsd.service ]; then
   PASSWORD=$(randpass 10 0)
