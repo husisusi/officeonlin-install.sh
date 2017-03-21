@@ -139,7 +139,7 @@ fi
  # Idempotence : do not recompile loolwsd, install & test if already done
 if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
   # leave if loowsd is already compiled and lool_forcebuild is not true.
-  echo "Loolwsd is already compiled and I'm not forced to recompile.\nLeaving here..."
+  echo -e "Loolwsd is already compiled and I'm not forced to recompile.\nLeaving here..."
   exit 1
 fi
 
@@ -158,7 +158,7 @@ fi
 cd ${lool_dir}
 [ -f ${lool_dir}/loolwsd ] && sudo -u lool make clean
 sudo -u lool ./autogen.sh
-[ -z "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
+[ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
 sudo -u lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" | tee -a $log_file
 # loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 sudo -u lool bash -c "make -j$cpu --directory=${lool_dir}" | tee -a $log_file
@@ -176,7 +176,7 @@ make install | tee -a $log_file
 mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
 
 # create log file for lool user
-[ -z "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
+[ -n "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
 chown lool:lool ${lool_logfile}
 
 if [ ! -f /lib/systemd/system/loolwsd.service ]; then
