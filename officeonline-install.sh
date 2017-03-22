@@ -198,6 +198,8 @@ mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache
 # create log file for lool user
 [ -n "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
 chown lool:lool ${lool_logfile}
+# create the hello-world file for test & demo
+sudo -Hu lool cp ${lool_dir}/test/data/hello.odt ${lool_dir}/test/data/hello-world.odt
 
 if [ ! -f /lib/systemd/system/loolwsd.service ]; then
   PASSWORD=$(randpass 10 0)
