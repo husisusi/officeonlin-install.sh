@@ -1,6 +1,6 @@
 #!/bin/bash
-#VERSION 1.5.1
-#Written by: Subhi H.
+#VERSION 2.0
+#Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
 #the terms of the GNU General Public License as published by the Free Software
