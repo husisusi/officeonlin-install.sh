@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.0
+#VERSION 2.0.1
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -96,7 +96,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if [ ${sh_interactive} ]; then
     dialog --backtitle "Information" \
     --title "${lo_version} is going to be built." \
-    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((8/${cpu})) HOURS (Depending on your CPU's speed),\n"\
+    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/${cpu})) HOURS (Depending on your CPU's speed),\n"\
 "SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
     clear
   fi
@@ -236,6 +236,7 @@ fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 ### Testing loolwsd ###
 if [ ${sh_interactive} ]; then
+  PASSWORD=$(awk -F'password=' '{printf $2}' /lib/systemd/system/loolwsd.service )
   dialog --backtitle "Information" \
   --title "Note" \
   --msgbox "The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n"\
@@ -246,7 +247,7 @@ fi
 {
 sudo -Hu lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${lo_dir}/workdir
-sleep 10
+sleep 18
 ps -u lool | grep loolwsd
 if [ $?  -eq "0" ]; then
   echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m"
@@ -254,7 +255,7 @@ if [ $?  -eq "0" ]; then
   ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
   systemctl enable loolwsd.service
 else
-  echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
+  echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} or try to restart your system ###\033[0m"
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 exit 0
