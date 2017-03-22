@@ -24,7 +24,7 @@ clear
 ### Script parameters ###
 soli="/etc/apt/sources.list"
 cpu=$(nproc)
-log_file="/tmp/officeonline.log"
+log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
 sh_interactive=true
 
 ### LibreOffice parameters ###
@@ -43,6 +43,9 @@ lool_maxdoc=100
 
 ###############################################################################
 ############################# System preparation ##############################
+#clear the logs in case of super multi fast script run.
+[ -f ${log_file} ] && rm ${log_file}
+{
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
@@ -61,9 +64,11 @@ fi
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
 ###############################################################################
 ######################## libreoffice compilation ##############################
+{
 #verify what version need to be downloaded if no version has been defined in config
 if [ -z "${lo_version}" ];then
   lo_major_v=$(curl -s ${lo_src_repo}/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
@@ -84,6 +89,7 @@ if [ ! -f ${lo_dir}/autogen.sh ]; then
   mv /opt/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
 fi
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
@@ -94,17 +100,19 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
 "SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
     clear
   fi
+  {
   cd ${lo_dir}
-  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts | tee -a $log_file
-  [ ${PIPESTATUS[0]} -ne 0 ] && exit 2
+  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts
+  [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
-  sudo -Hu lool make | tee -a $log_file
-  [ ${PIPESTATUS[0]} -ne 0 ] && exit 2
+  sudo -Hu lool make
+  [ $? -ne 0 ] && exit 2
+  } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 fi
 
 ###############################################################################
 ############################# Poco Installation ###############################
-
+{
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco="/opt/poco-${poco_version}-all"
 if [ ! -d $poco ]; then
@@ -113,23 +121,27 @@ if [ ! -d $poco ]; then
   tar xf /opt/poco-${poco_version}-all.tar.gz -C  /opt/
   chown lool:lool $poco -R
 fi
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
 ######## Poco Build ########
+{
 ## test if the poco poco has already been compiled
 # (the dir size should be around 450000ko vs 65000ko when just extracted)
 # so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ $(du -s ${poco} | awk '{print $1}') -lt 100000 ]; then
   cd "$poco"
-  sudo -Hu lool ./configure | tee -a $log_file
-  [ ${PIPESTATUS[0]} -ne 0 ] && exit 3
-  sudo -Hu lool make -j${cpu} | tee -a $log_file
-  [ ${PIPESTATUS[0]} -ne 0 ] && exit 3
+  sudo -Hu lool ./configure
+  [ $? -ne 0 ] && exit 3
+  sudo -Hu lool make -j${cpu}
+  [ $? -ne 0 ] && exit 3
   # poco take around 22/${cpu} minutes to compile on fast cpu
-  make install | tee -a $log_file
-  [ ${PIPESTATUS[0]} -ne 0 ] && exit 3
+  make install
+  [ $? -ne 0 ] && exit 3
 fi
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 ###############################################################################
 ########################### loolwsd Installation ##############################
+{
 #### Download dependencies ####
 if [ ! -d ${lool_dir} ]; then
   git clone https://github.com/husisusi/online ${lool_dir}
@@ -166,10 +178,10 @@ cd ${lool_dir}
 [ -f ${lool_dir}/loolwsd ] && sudo -Hu lool make clean
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
-sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" | tee -a $log_file
-[ ${PIPESTATUS[0]} -ne 0 ] && exit 4
+sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}"
+[ $? -ne 0 ] && exit 4
 # loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
-sudo -Hu lool make -j$cpu --directory=${lool_dir} | tee -a $log_file
+sudo -Hu lool make -j$cpu --directory=${lool_dir}
 _loolwsd_make_rc=${?} # get the make return code
 ### remove lool group from sudoers
 if [ -f /etc/sudoers ]; then
@@ -177,10 +189,10 @@ if [ -f /etc/sudoers ]; then
   rm $(grep -l '%lool' ${includedir})
 fi
 ##leave if make loowsd has failed
-[ ${_loolwsd_make_rc} -ne 0 ] && exit 1
+[ ${_loolwsd_make_rc} -ne 0 ] && exit 4
 #####################
 #### loolwsd Installation ###
-make install | tee -a $log_file
+make install
 mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
 
 # create log file for lool user
@@ -219,6 +231,7 @@ fi
 if [! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
 fi
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 ### Testing loolwsd ###
 if [ ${sh_interactive} ]; then
   dialog --backtitle "Information" \
@@ -228,16 +241,18 @@ if [ ${sh_interactive} ]; then
 "after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\nPlease press OK and wait 15 sec. I will start the service." 10 145
   clear
 fi
+{
 sudo -Hu lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${lo_dir}/workdir
 sleep 10
 ps -u lool | grep loolwsd
 if [ $?  -eq "0" ]; then
   echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m"
+  lsof -i :9980
   ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
   systemctl enable loolwsd.service
 else
   echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} ###\033[0m"
 fi
-lsof -i :9980
-exit
+} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+exit 0
