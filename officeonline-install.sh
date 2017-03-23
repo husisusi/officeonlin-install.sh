@@ -21,6 +21,7 @@ randpass() {
 clear
 ###############################################################################
 ################################# Parameters ##################################
+###############################################################################
 ### Script parameters ###
 soli="/etc/apt/sources.list"
 cpu=$(nproc)
@@ -43,9 +44,23 @@ lool_maxdoc=100
 
 ###############################################################################
 ############################# System preparation ##############################
+################################# OPERATIONS ##################################
+###############################################################################
 #clear the logs in case of super multi fast script run.
 [ -f ${log_file} ] && rm ${log_file}
 {
+###############################################################################
+############################ System Requirements ##############################
+echo "Verifying System Requirements:"
+### Test RAM size (4GB min) ###
+mem_available=$(grep MemTotal /proc/meminfo| grep -o '[0-9]\+')
+if [ ${mem_available} -lt 4000000 ]; then
+  echo "Error: The system do not meet the minimum requirements." >&2
+  echo "Error: 4GB RAM required!" >&2
+  exit 1
+else
+  echo "Memory: OK ($((mem_available/1024)) MiB)"
+fi
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
@@ -105,6 +120,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
+  ${lo_forcebuild} && sudo -Hu lool make clean
   sudo -Hu lool make
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
