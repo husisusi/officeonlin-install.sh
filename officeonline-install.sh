@@ -72,6 +72,7 @@ lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
 ### POCO parameters ###
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco_dir="/opt/poco-${poco_version}-all"
+poco_forcebuild=false
 poco_req_vol=510 # minimum space required for Poco compilation, in MB
 
 ### LibreOffice Online parameters ###
@@ -126,7 +127,7 @@ if [ ${#mountPointArray[@]} -ne 0 ]; then
     fs_item_avail=$(checkAvailableSpace $fs_item ${mountPointArray["$fs_item"]}) || exit 1
     echo "${fs_item}: PASSED (${mountPointArray["$fs_item"]} MiB Req., ${fs_item_avail} MiB avail.)"
   done
-elif ! $lo_forcebuild && ! $lool_forcebuild; then
+elif ! $lo_forcebuild && ! $lool_forcebuild && ! $poco_forcebuild; then
   echo "Nothing to build here..."
   exit 0
 fi
@@ -219,6 +220,7 @@ if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ]; then
   cd "$poco_dir"
   sudo -Hu lool ./configure
   [ $? -ne 0 ] && exit 3
+  $poco_forcebuild && sudo -Hu lool make clean
   sudo -Hu lool make -j${cpu}
   [ $? -ne 0 ] && exit 3
   # poco take around 22/${cpu} minutes to compile on fast cpu
