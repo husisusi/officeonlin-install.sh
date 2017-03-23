@@ -138,7 +138,7 @@ fi
 # run apt update && upgrade if last update is older than 1 day
 find /var/lib/apt/lists/ -mtime -1 |grep -q partial || apt-get update && apt-get upgrade -y
 
-[ ${sh_interactive} ] && apt-get install dialog -y
+${sh_interactive} && apt-get install dialog -y
 
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
@@ -182,7 +182,7 @@ fi
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
-  if [ ${sh_interactive} ]; then
+  if ${sh_interactive}; then
     dialog --backtitle "Information" \
     --title "${lo_version} is going to be built." \
     --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/${cpu})) HOURS (Depending on your CPU's speed),\n"\
@@ -216,7 +216,7 @@ fi
 ## test if the poco library has already been compiled
 # (the dir size should be around 450000ko vs 65000ko when just extracted)
 # so let say arbitrary : do compilation when folder size is less than 100Mo
-if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ]; then
+if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
   sudo -Hu lool ./configure
   [ $? -ne 0 ] && exit 3
@@ -324,7 +324,7 @@ if [! -e /etc/systemd/system/loolwsd.service ]; then
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 ### Testing loolwsd ###
-if [ ${sh_interactive} ]; then
+if ${sh_interactive}; then
   PASSWORD=$(awk -F'password=' '{printf $2}' /lib/systemd/system/loolwsd.service )
   dialog --backtitle "Information" \
   --title "Note" \
