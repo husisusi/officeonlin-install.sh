@@ -114,7 +114,7 @@ declare -A mountPointArray # declare associative array
 if [ ! -d ${lo_dir}/instdir ]; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
-if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ]; then
+if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
   mountPointArray["$poco_fs"]=$((mountPointArray["$poco_fs"]+$poco_req_vol))
 fi
 if [ ! -f ${lool_dir}/loolwsd ]; then
