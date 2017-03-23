@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.0.1
+#VERSION 2.1.0
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
