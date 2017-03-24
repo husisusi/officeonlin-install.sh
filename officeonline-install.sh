@@ -76,6 +76,9 @@ poco_forcebuild=false
 poco_req_vol=510 # minimum space required for Poco compilation, in MB
 
 ### LibreOffice Online parameters ###
+lool_src_repo="https://github.com/LibreOffice/online.git"
+lool_src_tags='https://gerrit.libreoffice.org/gitweb?p=online.git;a=tags'
+lool_version='' #2.0.5
 lool_dir="/opt/online"
 lool_configure_opts='--enable-debug'
 lool_logfile='/var/log/loolwsd.log'
@@ -127,9 +130,6 @@ if [ ${#mountPointArray[@]} -ne 0 ]; then
     fs_item_avail=$(checkAvailableSpace $fs_item ${mountPointArray["$fs_item"]}) || exit 1
     echo "${fs_item}: PASSED (${mountPointArray["$fs_item"]} MiB Req., ${fs_item_avail} MiB avail.)"
   done
-elif ! $lo_forcebuild && ! $lool_forcebuild && ! $poco_forcebuild; then
-  echo "Nothing to build here..."
-  exit 0
 fi
 
 ###############################################################################
@@ -232,9 +232,20 @@ fi
 ########################### loolwsd Installation ##############################
 {
 #### Download dependencies ####
-if [ ! -d ${lool_dir} ]; then
-  git clone https://github.com/husisusi/online ${lool_dir}
-  chown lool:lool ${lool_dir} -R
+if [ -z "${lool_version}" ]; then
+  lool_version=$(curl -s "${lool_src_tags}" | grep -Em 1 '<a.*list subject.*>([0-9+]\.)*+[0-9]</a>' | sed -e 's/.*\([0-9+]\.[0-9+]\.[0-9+]\)<.*/\1/')
+fi
+if [ -d ${lool_dir} ]; then
+  cd ${lool_dir}
+  lool_local=$(git status| head -1 | awk '{print $NF}')
+  if [ ${lool_version} != ${lool_local} ]; then
+    [ -f ${lool_dir}/loolwsd ] && lool_forcebuild=true
+    git fetch --tags
+    git checkout tags/${lool_version}
+  fi
+else
+  git clone --branch ${lool_version} ${lool_src_repo} ${lool_dir}
+  cd ${lool_dir} && git checkout tags/${lool_version}
 fi
 
 if ! npm -g list jake >/dev/null; then
@@ -263,6 +274,7 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
     grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
   fi
 fi
+chown lool:lool ${lool_dir} -R
 cd ${lool_dir}
 [ -f ${lool_dir}/loolwsd ] && sudo -Hu lool make clean
 sudo -Hu lool ./autogen.sh
