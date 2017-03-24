@@ -63,7 +63,7 @@ log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
 sh_interactive=true
 
 ### LibreOffice parameters ###
-lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
+lo_src_repo='http://download.documentfoundation.org/libreoffice'
 lo_version='' #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
@@ -160,10 +160,10 @@ chown lool:lool /home/lool -R
 {
 #verify what version need to be downloaded if no version has been defined in config
 if [ -z "${lo_version}" ];then
-  lo_major_v=$(curl -s ${lo_src_repo}/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/${lo_major_v}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
 else
-  lo_major_v=$(echo ${lo_version} | cut -d '.' -f1-3)
+  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
 fi
 # check is libreoffice sources are already present and in the correct version
 if [ -d ${lo_dir} ]; then
@@ -173,7 +173,7 @@ if [ -d ${lo_dir} ]; then
 fi
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
-  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/${lo_major_v}/$lo_version.tar.xz -P /opt/
+  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P /opt/
   [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
   mv /opt/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
