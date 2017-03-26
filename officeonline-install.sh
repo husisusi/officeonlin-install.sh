@@ -95,7 +95,7 @@ lool_req_vol=600 # minimum space required for LibreOffice Online compilation, in
 echo "Verifying System Requirements:"
 ### Test RAM size (4GB min) ###
 mem_available=$(grep MemTotal /proc/meminfo| grep -o '[0-9]\+')
-if [ ${mem_available} -lt 4000000 ]; then
+if [ ${mem_available} -lt 3700000 ]; then
   echo "Error: The system do not meet the minimum requirements." >&2
   echo "Error: 4GB RAM required!" >&2
   exit 1
