@@ -348,6 +348,7 @@ eval $(SearchGitCommit $SearchGitOpts)
 if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
   lool_forcebuild=true
 fi
+chmod -R lool:lool ${lool_dir}
 set +e
 if ! npm -g list jake >/dev/null; then
   npm install -g npm
