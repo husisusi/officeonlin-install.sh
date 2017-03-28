@@ -5,6 +5,21 @@ Script intended to build & install Office Online on Ubuntu 16.04 and Debian 8.7 
 Written by: Subhi H. & Marc C.
 
 ----
+
+## Summary
+* [GNUv3 Licence](#gnuv3-licence)
+* [Requirements](#requirements)
+* [Notice](#notice)
+* [Default Installation](#default-installation)
+* [Idempotence](#idempotence)
+* [Parameters](#parameters)
+  * [LibreOffice](#libreoffice)
+  * [Poco](#poco)
+  * [Lool](#lool)
+    * [Sources status](#sources-status)
+    * [Compilation options](#compilation-options)
+* [Nota Bene](#nota-bene)
+
 ## GNUv3 Licence
 > This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 > This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -26,7 +41,7 @@ It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlin
 
 Your can manage your service using systemd: `systemctl start|stop|restart|status loolwsd.service`
 
-### Idempotence
+## Idempotence
 This script has been made idempotent: Only the required action will be executed if it is run several times on the same System in order to get to the expected state.
 
 _Example_: when updating **LibreOffice** online to the latest version, **LibreOffice** compilation and installation steps will not be run as it is already installed.
@@ -74,7 +89,9 @@ The following parameters are options passed to the configuration script before c
 - `lool_configure_opts`: free form string to add even more options ! _`--enable-debug` by default_. **For experts only!**
 
 ## Nota Bene
-- All the script's output is logged in the file `/tmp/YYYYMMDD-HHmm_officeonline.log`. where `YYYYMMDD-HHmm` is the date (to the minute) when the script as been launched.
+- All the script's output is logged in the file `/tmp/YYYYMMDD-HHmm_officeonline.log`. where `YYYYMMDD-HHmm` is the date at the minute the script as been launched.
+
+- `Maxdoc` & `Maxcon` are built-in limitations in WebSocket and intended to guarantee a good QoS and limit resources consumption on the host. *If you intend to change this parameters, take into account that __1 doc opened is around 20MB of RAM used.__*
 
 - Default parameters are values chosen by the maintainers of this script and not default values used by the softwares compiled here.
 
