@@ -192,6 +192,19 @@ lool_req_vol=600 # minimum space required for LibreOffice Online compilation, in
 #clear the logs in case of super multi fast script run.
 [ -f ${log_file} ] && rm ${log_file}
 {
+#verify what version need to be downloaded if no version has been defined in config
+if [ -z "${lo_version}" ];then
+  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+else
+  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
+fi
+# check is libreoffice sources are already present and in the correct version
+if [ -d ${lo_dir} ]; then
+  lo_local_version="libreoffice-$(grep 'PACKAGE_VERSION=' ${lo_dir}/configure | cut -d \' -f 2)"
+  # rename the folder if not in the expected verion
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} ${lo_local_version}
+fi
 ###############################################################################
 ############################ System Requirements ##############################
 echo "Verifying System Requirements:"
@@ -257,19 +270,6 @@ chown lool:lool /home/lool -R
 ###############################################################################
 ######################## libreoffice compilation ##############################
 {
-#verify what version need to be downloaded if no version has been defined in config
-if [ -z "${lo_version}" ];then
-  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-else
-  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
-fi
-# check is libreoffice sources are already present and in the correct version
-if [ -d ${lo_dir} ]; then
-  lo_local_version="libreoffice-$(grep 'PACKAGE_VERSION=' ${lo_dir}/configure | cut -d \' -f 2)"
-  # rename the folder if not in the expected verion
-  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} ${lo_local_version}
-fi
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P /opt/
@@ -348,7 +348,7 @@ eval $(SearchGitCommit $SearchGitOpts)
 if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
   lool_forcebuild=true
 fi
-chmod -R lool:lool ${lool_dir}
+chown -R lool:lool ${lool_dir}
 set +e
 if ! npm -g list jake >/dev/null; then
   npm install -g npm
