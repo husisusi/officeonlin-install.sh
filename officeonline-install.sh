@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.1.0
+#VERSION 2.2.0
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -52,6 +52,103 @@ checkAvailableSpace() {
   fi
   return 0
 }
+SearchGitCommit() {
+  # return all the commands required to set the repo to the desired state
+  # (change branch and head to a commit found by search on the repo tree)
+  # return also a trigger value "repChanged" that's true if the repo must be updated
+  # Usage = FundGitCommit [--branch|-t [branch name], --commit|-t [commit], --tag|-t [tag]]
+  # options precedence: commit > tag > branch > default
+  # accept long options with '=' (--branch="master"|--branch master)
+  local rcode=false
+  if [ ! -d .git ]; then
+    # /!\ Current directory must be inside the git repository
+    echo "Error: current directory is not a git repository !" >&2
+    return 2
+  fi
+  while [ $# -ne 0 ]; do
+    case $1 in
+      "--branch*"|'-b')
+        if [[ $1 =~ "=" ]]; then
+          local myBranch=$(echo $1 |cut -d '=' -f2)
+          shift 1
+        else
+          local myBranch=$2
+          shift 2
+        fi
+        ;;
+      "--commit*"|'-c')
+        if [[ $1 =~ "=" ]]; then
+          local myCommit=$(echo $1 |cut -d '=' -f2)
+          shift 1
+        else
+          local myCommit=$2
+          shift 2
+        fi
+        ;;
+      "--tag*"|'-t')
+        if [[ $1 =~ "=" ]]; then
+          local myTag=$(echo $1 |cut -d '=' -f2)
+          shift 1
+        else
+          local myTag=$2
+          shift 2
+        fi
+        ;;
+      *) shift 1 ;;
+    esac
+  done
+  # getting local info on the repository.
+  local HeadBranch=$(git branch|grep -e ^'*'|awk '{print $NF}')
+  local HeadCommit=$(git rev-parse HEAD)
+  git fetch
+  # checking if args are valid inside the repository
+  if [ -n "$myCommit" ]; then
+    if ! git cat-file commit $myCommit >/dev/null; then
+      # check if the commit doesn't exist
+      echo "Error: $myCommit is not a valid commit." >&2
+      return 1
+    fi
+    local myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
+    [ "${myCommitBranch}" != "${HeadBranch}" ] && echo "git checkout ${myCommitBranch};" && rcode=true
+    [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  fi
+  if [ -n "$myTag" ]; then
+     if ! git ls-remote -t | grep -q tags/${myTag}^; then
+       # check if the Tag doesn't exist
+       echo "Error: $myTag is not a valid Tag." >&2
+       return 1
+     fi
+    local myTagCommit=$(git ls-remote -t | grep tags/${myTag}^| awk '{print $1}')
+    local myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
+    [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
+    [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  fi
+  if [ -n "$myBranch" ]; then
+    if ! git branch -a| grep -q $myBranch; then
+      # check if branch doesn't exist localy or remotely, then quit.
+      echo "Error: $myBranch is not a valid branch." >&2
+      return 1
+    fi
+    #change the remote branch if needed and reset to latestCommit
+    local latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
+    [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
+    [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  fi
+  # if no argument has been given, just get the latest commit of the current checked-out branch.
+  # this block is for completion as this function is never going to be called without args here.
+  if [ -z "${myBranch}${myCommit}${mytag}" ]; then
+    local latestCommit=$(git log -1 origin/${HeadBranch}| grep ^commit | awk '{print $NF}')
+    [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  fi
+}
 clear
 ###############################################################################
 ################################# Parameters ##################################
@@ -63,7 +160,7 @@ log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
 sh_interactive=true
 
 ### LibreOffice parameters ###
-lo_src_repo='http://download.documentfoundation.org/libreoffice/src'
+lo_src_repo='http://download.documentfoundation.org/libreoffice'
 lo_version='' #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
@@ -76,6 +173,11 @@ poco_forcebuild=false
 poco_req_vol=510 # minimum space required for Poco compilation, in MB
 
 ### LibreOffice Online parameters ###
+lool_src_repo="https://github.com/LibreOffice/online.git"
+# variable precedence: commit > tag > branch
+lool_src_branch='master' # a existing branch name.
+lool_src_commit='' # the full id of a git commit
+lool_src_tag='' # a tag in the repo git
 lool_dir="/opt/online"
 lool_configure_opts='--enable-debug'
 lool_logfile='/var/log/loolwsd.log'
@@ -127,9 +229,6 @@ if [ ${#mountPointArray[@]} -ne 0 ]; then
     fs_item_avail=$(checkAvailableSpace $fs_item ${mountPointArray["$fs_item"]}) || exit 1
     echo "${fs_item}: PASSED (${mountPointArray["$fs_item"]} MiB Req., ${fs_item_avail} MiB avail.)"
   done
-elif ! $lo_forcebuild && ! $lool_forcebuild && ! $poco_forcebuild; then
-  echo "Nothing to build here..."
-  exit 0
 fi
 
 ###############################################################################
@@ -160,10 +259,10 @@ chown lool:lool /home/lool -R
 {
 #verify what version need to be downloaded if no version has been defined in config
 if [ -z "${lo_version}" ];then
-  lo_major_v=$(curl -s ${lo_src_repo}/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/${lo_major_v}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
 else
-  lo_major_v=$(echo ${lo_version} | cut -d '.' -f1-3)
+  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
 fi
 # check is libreoffice sources are already present and in the correct version
 if [ -d ${lo_dir} ]; then
@@ -173,7 +272,7 @@ if [ -d ${lo_dir} ]; then
 fi
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
-  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/${lo_major_v}/$lo_version.tar.xz -P /opt/
+  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P /opt/
   [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
   mv /opt/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
@@ -204,8 +303,10 @@ fi
 ############################# Poco Installation ###############################
 {
 if [ ! -d $poco_dir ]; then
+  #Fix for poco_version being unset after Lo compilation? TODO: Check the case
+  [ -z "${poco_version}" ] && poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
   [ ! -f /opt/poco-${poco_version}-all.tar.gz ] &&\
-  wget -c https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/
+  wget -c https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/  || exit 3
   tar xf /opt/poco-${poco_version}-all.tar.gz -C  /opt/
   chown lool:lool $poco_dir -R
 fi
@@ -231,12 +332,24 @@ fi
 ###############################################################################
 ########################### loolwsd Installation ##############################
 {
+set -e
+SearchGitOpts=''
+[ -n "${lool_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${lool_src_branch}"
+[ -n "${lool_src_commit}" ] && SearchGitOpts="${SearchGitOpts} -c ${lool_src_commit}"
+[ -n "${lool_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -t ${lool_src_tag}"
 #### Download dependencies ####
-if [ ! -d ${lool_dir} ]; then
-  git clone https://github.com/husisusi/online ${lool_dir}
-  chown lool:lool ${lool_dir} -R
+if [ -d ${lool_dir} ]; then
+  cd ${lool_dir}
+else
+  git clone ${lool_src_repo} ${lool_dir}
+  cd ${lool_dir}
 fi
-
+eval $(SearchGitCommit $SearchGitOpts)
+if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
+  lool_forcebuild=true
+fi
+chmod -R lool:lool ${lool_dir}
+set +e
 if ! npm -g list jake >/dev/null; then
   npm install -g npm
   npm install -g jake
@@ -263,8 +376,9 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
     grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
   fi
 fi
+chown lool:lool ${lool_dir} -R
 cd ${lool_dir}
-[ -f ${lool_dir}/loolwsd ] && sudo -Hu lool make clean
+${lool_forcebuild} && sudo -Hu lool make clean uninstall
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
 sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}"
@@ -319,7 +433,7 @@ if [ ! -f /etc/loolwsd/ca-chain.cert.pem ]; then
   openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/cert.pem
   openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/ca-chain.cert.pem
 fi
-if [! -e /etc/systemd/system/loolwsd.service ]; then
+if [ ! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
