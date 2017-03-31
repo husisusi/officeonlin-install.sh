@@ -170,7 +170,7 @@ lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
 poco_dir="/opt/poco-${poco_version}-all"
 poco_forcebuild=false
-poco_req_vol=510 # minimum space required for Poco compilation, in MB
+poco_req_vol=550 # minimum space required for Poco compilation, in MB
 
 ### LibreOffice Online parameters ###
 lool_src_repo="https://github.com/LibreOffice/online.git"
@@ -184,7 +184,7 @@ lool_logfile='/var/log/loolwsd.log'
 lool_forcebuild=false
 lool_maxcon=200
 lool_maxdoc=100
-lool_req_vol=600 # minimum space required for LibreOffice Online compilation, in MB
+lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in MB
 
 ###############################################################################
 ################################# OPERATIONS ##################################
