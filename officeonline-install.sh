@@ -173,7 +173,7 @@ poco_forcebuild=false
 poco_req_vol=550 # minimum space required for Poco compilation, in MB
 
 ### LibreOffice Online parameters ###
-lool_src_repo="https://github.com/LibreOffice/online.git"
+lool_src_repo="https://github.com/husisusi/online.git"
 # variable precedence: commit > tag > branch
 lool_src_branch='master' # a existing branch name.
 lool_src_commit='' # the full id of a git commit
