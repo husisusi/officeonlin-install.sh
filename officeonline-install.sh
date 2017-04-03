@@ -378,7 +378,7 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
 fi
 chown lool:lool ${lool_dir} -R
 cd ${lool_dir}
-${lool_forcebuild} && sudo -Hu lool make clean uninstall
+${lool_forcebuild} && make clean uninstall
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
 sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}"
