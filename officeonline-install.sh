@@ -203,7 +203,7 @@ fi
 if [ -d ${lo_dir} ]; then
   lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
   # rename the folder if not in the expected verion
-  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} ${lo_local_version}
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
 fi
 ###############################################################################
 ############################ System Requirements ##############################
