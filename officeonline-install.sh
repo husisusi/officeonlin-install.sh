@@ -453,7 +453,7 @@ rm -rf ${lo_dir}/workdir
 sleep 18
 ps -u lool | grep loolwsd
 if [ $?  -eq "0" ]; then
-  echo -e "\033[33;7m### loolwsd is running. Enjoy!!! ###\033[0m"
+  echo -e "\033[33;7m### loolwsd is running. Enjoy!!! Service will be stopped after this ###\033[0m"
   lsof -i :9980
   ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
   systemctl enable loolwsd.service
