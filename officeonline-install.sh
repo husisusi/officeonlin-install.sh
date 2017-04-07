@@ -457,6 +457,7 @@ if [ $?  -eq "0" ]; then
   lsof -i :9980
   ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
   systemctl enable loolwsd.service
+  systemctl daemon-reload
 else
   echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} or try to restart your system ###\033[0m"
 fi
