@@ -187,25 +187,6 @@ lool_maxdoc=100
 lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in MB
 
 ###############################################################################
-################################# OPERATIONS ##################################
-###############################################################################
-#clear the logs in case of super multi fast script run.
-[ -f ${log_file} ] && rm ${log_file}
-{
-#verify what version need to be downloaded if no version has been defined in config
-if [ -z "${lo_version}" ];then
-  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-else
-  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
-fi
-# check is libreoffice sources are already present and in the correct version
-if [ -d ${lo_dir} ]; then
-  lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
-  # rename the folder if not in the expected verion
-  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
-fi
-###############################################################################
 ############################ System Requirements ##############################
 echo "Verifying System Requirements:"
 ### Test RAM size (4GB min) ###
@@ -242,6 +223,26 @@ if [ ${#mountPointArray[@]} -ne 0 ]; then
     fs_item_avail=$(checkAvailableSpace $fs_item ${mountPointArray["$fs_item"]}) || exit 1
     echo "${fs_item}: PASSED (${mountPointArray["$fs_item"]} MiB Req., ${fs_item_avail} MiB avail.)"
   done
+fi
+
+###############################################################################
+################################# OPERATIONS ##################################
+###############################################################################
+#clear the logs in case of super multi fast script run.
+[ -f ${log_file} ] && rm ${log_file}
+{
+#verify what version need to be downloaded if no version has been defined in config
+if [ -z "${lo_version}" ];then
+  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+else
+  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
+fi
+# check is libreoffice sources are already present and in the correct version
+if [ -d ${lo_dir} ]; then
+  lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
+  # rename the folder if not in the expected verion
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
 fi
 
 ###############################################################################
