@@ -187,6 +187,27 @@ lool_maxdoc=100
 lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in MB
 
 ###############################################################################
+################################# OPERATIONS ##################################
+###############################################################################
+#clear the logs in case of super multi fast script run.
+[ -f ${log_file} ] && rm ${log_file}
+{
+#verify what version of LibreOffice need to be downloaded if no version has been defined in config
+if [ -z "${lo_version}" ]; then
+  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+else
+  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
+  # FIX when lo_version do not have subtring "libreoffice"
+  [ ${lo_version:0:5} != "libre" ] && lo_version="libreoffice-${lo_version}"
+fi
+# check is libreoffice sources are already present and in the correct version
+if [ -d ${lo_dir} ]; then
+  lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
+  # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
+  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true
+fi
+###############################################################################
 ############################ System Requirements ##############################
 echo "Verifying System Requirements:"
 ### Test RAM size (4GB min) ###
@@ -202,12 +223,12 @@ fi
 # find the target filesystem for each sw and add the required space for this FS
 # on an array BUT only if no build have been done yet.
 lo_fs=$(getFilesystem $(dirname $lo_dir)) || exit 1
-poco_fs=$(getFilesystem /opt) || exit 1
+poco_fs=$(getFilesystem $(dirname $poco_dir)) || exit 1
 lool_fs=$(getFilesystem $(dirname $lool_dir)) || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
-if [ ! -d ${lo_dir}/instdir ]; then
+if [ ! -d ${lo_dir}/instdir ] || ${lo_updated}; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
 if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
@@ -225,25 +246,6 @@ if [ ${#mountPointArray[@]} -ne 0 ]; then
   done
 fi
 
-###############################################################################
-################################# OPERATIONS ##################################
-###############################################################################
-#clear the logs in case of super multi fast script run.
-[ -f ${log_file} ] && rm ${log_file}
-{
-#verify what version need to be downloaded if no version has been defined in config
-if [ -z "${lo_version}" ];then
-  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-else
-  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
-fi
-# check is libreoffice sources are already present and in the correct version
-if [ -d ${lo_dir} ]; then
-  lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
-  # rename the folder if not in the expected verion
-  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
-fi
 
 ###############################################################################
 ############################# System preparation ##############################
@@ -271,11 +273,13 @@ chown lool:lool /home/lool -R
 ###############################################################################
 ######################## libreoffice compilation ##############################
 {
+# rename the folder if not in the expected version
+[ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
-  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P /opt/
-  [ ! -d $lo_version ] && tar xf /opt/$lo_version.tar.xz -C  /opt/
-  mv /opt/$lo_version ${lo_dir}
+  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P $(dirname ${lo_dir})/
+  [ ! -d $lo_version ] && tar xf $(dirname ${lo_dir})/$lo_version.tar.xz -C  $(dirname ${lo_dir})/
+  mv $(dirname ${lo_dir})/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
@@ -306,9 +310,9 @@ fi
 if [ ! -d $poco_dir ]; then
   #Fix for poco_version being unset after Lo compilation? TODO: Check the case
   [ -z "${poco_version}" ] && poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
-  [ ! -f /opt/poco-${poco_version}-all.tar.gz ] &&\
-  wget -c https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P /opt/  || exit 3
-  tar xf /opt/poco-${poco_version}-all.tar.gz -C  /opt/
+  [ ! -f $(dirname $poco_dir)/poco-${poco_version}-all.tar.gz ] &&\
+  wget -c https://pocoproject.org/releases/poco-${poco_version}/poco-${poco_version}-all.tar.gz -P $(dirname $poco_dir)/  || exit 3
+  tar xf $(dirname $poco_dir)/poco-${poco_version}-all.tar.gz -C  $(dirname $poco_dir)/
   chown lool:lool $poco_dir -R
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
@@ -379,7 +383,7 @@ if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
 fi
 chown lool:lool ${lool_dir} -R
 cd ${lool_dir}
-${lool_forcebuild} && make clean uninstall
+${lool_forcebuild} && [ -f ${lool_dir}/configure ] && make clean uninstall
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
 sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}"
