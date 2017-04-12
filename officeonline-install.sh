@@ -205,7 +205,7 @@ fi
 if [ -d ${lo_dir} ]; then
   lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
   # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
-  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true
+  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true || lo_updated=false
 fi
 ###############################################################################
 ############################ System Requirements ##############################
@@ -228,7 +228,7 @@ lool_fs=$(getFilesystem $(dirname $lool_dir)) || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
-if [ ! -d ${lo_dir}/instdir ] || ${lo_updated}; then
+if [ ! -d ${lo_dir}/instdir ] || ${lo_updated} ; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
 if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
@@ -273,12 +273,14 @@ chown lool:lool /home/lool -R
 ###############################################################################
 ######################## libreoffice compilation ##############################
 {
-# rename the folder if not in the expected version
-[ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
+  set -e
   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P $(dirname ${lo_dir})/
   [ ! -d $lo_version ] && tar xf $(dirname ${lo_dir})/$lo_version.tar.xz -C  $(dirname ${lo_dir})/
+  set +e
+  # rename the folder if not in the expected version
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
   mv $(dirname ${lo_dir})/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
 fi
