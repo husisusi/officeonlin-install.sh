@@ -273,12 +273,14 @@ chown lool:lool /home/lool -R
 ###############################################################################
 ######################## libreoffice compilation ##############################
 {
-# rename the folder if not in the expected version
-[ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
 # download and extract libreoffice source only if not here
 if [ ! -f ${lo_dir}/autogen.sh ]; then
+  set -e
   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P $(dirname ${lo_dir})/
   [ ! -d $lo_version ] && tar xf $(dirname ${lo_dir})/$lo_version.tar.xz -C  $(dirname ${lo_dir})/
+  set +e
+  # rename the folder if not in the expected version
+  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
   mv $(dirname ${lo_dir})/$lo_version ${lo_dir}
   chown lool:lool ${lo_dir} -R
 fi
