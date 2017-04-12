@@ -205,7 +205,7 @@ fi
 if [ -d ${lo_dir} ]; then
   lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
   # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
-  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true
+  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true || lo_updated=false
 fi
 ###############################################################################
 ############################ System Requirements ##############################
@@ -228,7 +228,7 @@ lool_fs=$(getFilesystem $(dirname $lool_dir)) || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
-if [ ! -d ${lo_dir}/instdir ] || ${lo_updated}; then
+if [ ! -d ${lo_dir}/instdir ] || ${lo_updated} ; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
 if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
