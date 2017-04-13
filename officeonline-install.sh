@@ -264,6 +264,7 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make ope
  libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
  libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev \
  libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
+ libpoppler-private-dev libpoppler-cpp-dev libharfbuzz-dev \
  libxslt1-dev xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -306,6 +307,10 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   cd ${lo_dir}
   DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_BUILD_MULTIARCH`
   export DEB_HOST_MULTIARCH
+  CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
+  CXXFLAGS="$CFLAGS"
+  LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
+  export CFLAGS CXXFLAGS LDFLAGS
   sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts \
     --disable-avmedia \
     --disable-database-connectivity \
@@ -314,6 +319,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-gtk \
     --disable-gtk3 \
     --disable-systray \
+    --disable-gio \
     --disable-dbus \
     --disable-gui \
     --disable-randr \
@@ -329,6 +335,8 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-odk \
     --disable-extension-update \
     --without-java \
+    --without-junit \
+    --without-doxygen --without-javadoc \
     --enable-lto \
     --enable-eot \
     --enable-release-build \
