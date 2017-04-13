@@ -336,7 +336,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-systray \
     --disable-gio \
     --disable-dbus \
-    --disable-gconf \
+    --disable-dconf \
     --disable-gstreamer-1-0 \
     --without-helppack-integration \
     --disable-online-update \
