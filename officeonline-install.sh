@@ -262,7 +262,7 @@ grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get
 
 apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
  libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
- libcups2-dev openjdk-7-jdk gperf doxygen libxslt1-dev xsltproc -y
+ libcups2-dev openjdk-7-jdk gperf doxygen libxslt1-dev xsltproc libxml2-utils -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
 
