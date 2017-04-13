@@ -327,6 +327,8 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
     --disable-avmedia \
     --disable-database-connectivity \
+    --disable-postgresql-sdbc
+    --disable-firebird-sdbc
     --disable-lpsolve \
     --disable-coinmp \
     --disable-gtk \
@@ -365,6 +367,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --with-system-curl \
     --with-system-openssl \
     --with-system-openldap \
+    --with-system-postgresql \
     --with-system-boost \
     --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
     --with-system-libpng \
