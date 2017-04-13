@@ -305,13 +305,20 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_BUILD_MULTIARCH`
+  DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_HOST_MULTIARCH`
   export DEB_HOST_MULTIARCH
+  DEB_HOST_GNU_TYPE=`dpkg-architecture -q DEB_HOST_GNU_TYPE`
+  export DEB_HOST_GNU_TYPE
+  DEB_BUILD_GNU_TYPE=`dpkg-architecture -q DEB_BUILD_GNU_TYPE`
+  export DEB_BUILD_GNU_TYPE
   CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
   CXXFLAGS="$CFLAGS"
   LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
   export CFLAGS CXXFLAGS LDFLAGS
-  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts \
+  # Preserve env vars: sudo -E
+  sudo -EHu lool ./autogen.sh --without-help --without-myspell-dicts \
+    --libdir=/usr/lib \
+    --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
     --disable-avmedia \
     --disable-database-connectivity \
     --disable-lpsolve \
