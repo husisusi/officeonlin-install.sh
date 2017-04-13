@@ -43,7 +43,10 @@ checkAvailableSpace() {
   if [ "${CompFs}" != "/dev/simfs" ]; then
     [ ! -b ${CompFs} ] && echo "Error: ${CompFs} is not a valid filesystem" >&2 && return 2
   fi
-  availableMB=$(df -m --output=avail ${CompFs}|tail -1)
+  availableMB=$(df -m --output=avail ${CompFs} 2>/dev/null |tail -1)
+  if [ -z "${availableMB}" ]; then
+    availableMB=$(df -m --output=source,avail | grep -m1 '^${CompFs}$' 2>/dev/null | awk '{print $2}')
+  fi
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"
     echo "Not Enough space available on ${CompName} (${CompRequirement} MiB required)" >&2
