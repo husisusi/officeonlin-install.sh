@@ -261,7 +261,8 @@ ${sh_interactive} && apt-get install dialog -y
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
 apt-get install sudo curl libkrb5-dev systemd python-polib git make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
- libpng12-dev libjpeg8-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libcurl-dev libboost-dev libjemalloc-dev \
+ libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
+ libboost-dev libjemalloc-dev \
  libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
  libxslt1-dev xsltproc libxml2-utils uuid-runtime -y
 [ $? -ne 0 ] && exit 1
