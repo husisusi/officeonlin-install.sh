@@ -39,7 +39,10 @@ checkAvailableSpace() {
   local CompFs=$1
   local CompRequirement=$2
   # check the arguments:
-  [ ! -b ${CompFs} ] && echo "Error: ${CompFs} is not a valid filesystem" >&2 && return 2
+  # Check if not in OpenVZ, /dev/simfs is a virtual device
+  if [ "${CompFs}" != "/dev/simfs" ]; then
+    [ ! -b ${CompFs} ] && echo "Error: ${CompFs} is not a valid filesystem" >&2 && return 2
+  fi
   availableMB=$(df -m --output=avail ${CompFs}|tail -1)
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"
