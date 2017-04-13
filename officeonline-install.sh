@@ -264,7 +264,7 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git make openssl g++ 
  libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
  libboost-dev libjemalloc-dev \
  libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
- libxslt1-dev xsltproc libxml2-utils uuid-runtime -y
+ libxslt1-dev xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
 
