@@ -268,6 +268,7 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make ope
  libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
  libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
  libpoppler-private-dev libpoppler-cpp-dev libharfbuzz-dev libcairo2-dev libapr1-dev libaprutil1-dev libldap2-dev \
+ libgl1-mesa-dev libxt-dev x11proto-render-dev libx11-dev \
  libxslt1-dev xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -335,8 +336,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-systray \
     --disable-gio \
     --disable-dbus \
-    --disable-gui \
-    --disable-randr \
+    --disable-gconf \
     --disable-gstreamer-1-0 \
     --without-helppack-integration \
     --disable-online-update \
