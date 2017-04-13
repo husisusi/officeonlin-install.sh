@@ -264,10 +264,10 @@ ${sh_interactive} && apt-get install dialog -y
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
 apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
- libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
+ libpng16-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
  libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
  libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
- libpoppler-private-dev libpoppler-cpp-dev libharfbuzz-dev \
+ libpoppler-private-dev libpoppler-cpp-dev libharfbuzz-dev libcairo2-dev libapr1-dev libaprutil1-dev \
  libxslt1-dev xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -360,6 +360,8 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --with-system-libxml \
     --with-system-icu \
     --with-system-poppler \
+    --with-system-cairo \
+    --with-system-apr \
     --with-system-curl \
     --with-system-boost \
     --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
