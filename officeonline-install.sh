@@ -327,8 +327,8 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
     --disable-avmedia \
     --disable-database-connectivity \
-    --disable-postgresql-sdbc
-    --disable-firebird-sdbc
+    --disable-postgresql-sdbc \
+    --disable-firebird-sdbc \
     --disable-lpsolve \
     --disable-coinmp \
     --disable-gtk \
