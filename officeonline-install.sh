@@ -45,7 +45,7 @@ checkAvailableSpace() {
   fi
   availableMB=$(df -m --output=avail ${CompFs} 2>/dev/null |tail -1)
   if [ -z "${availableMB}" ]; then
-    availableMB=$(df -m --output=source,avail | grep -m1 '^${CompFs}\s.' 2>/dev/null | awk '{print $2}')
+    availableMB=$(df -m --output=source,avail | grep -m1 "^${CompFs}" 2>/dev/null | awk '{print $2}')
   fi
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"
