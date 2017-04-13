@@ -336,7 +336,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-extension-update \
     --without-java \
     --without-junit \
-    --without-doxygen --without-javadoc \
+    --without-doxygen \
     --enable-lto \
     --enable-eot \
     --enable-release-build \
