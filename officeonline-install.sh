@@ -260,10 +260,10 @@ ${sh_interactive} && apt-get install dialog -y
 
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
-apt-get install sudo curl libkrb5-dev systemd python-polib git make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
+apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
  libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
- libboost-dev libjemalloc-dev \
- libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
+ libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev \
+ libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
  libxslt1-dev xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -304,6 +304,8 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
+  DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_BUILD_MULTIARCH`
+  export DEB_HOST_MULTIARCH
   sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts \
     --disable-avmedia \
     --disable-database-connectivity \
@@ -317,6 +319,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --disable-randr \
     --disable-gstreamer-1-0 \
     --without-helppack-integration \
+    --disable-online-update \
     --enable-python=no \
     --disable-neon \
     --disable-cups \
@@ -338,6 +341,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --with-system-poppler \
     --with-system-curl \
     --with-system-boost \
+    --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
     --with-system-libpng \
     --with-alloc=jemalloc
   [ $? -ne 0 ] && exit 2
