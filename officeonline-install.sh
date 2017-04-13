@@ -260,10 +260,10 @@ ${sh_interactive} && apt-get install dialog -y
 
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
-apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
- libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
- libcups2-dev openjdk-7-jdk gperf doxygen libxslt1-dev xsltproc libxml2-utils python-dev python3-dev libxt-dev libxrender-dev libxrandr-dev \
- uuid-runtime bison flex zip libgtk-3-dev libgtk2.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgl1-mesa-dev ant junit4 -y
+apt-get install sudo curl libkrb5-dev systemd python-polib git make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
+ libpng12-dev libjpeg8-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libcurl-dev libboost-dev libjemalloc-dev \
+ libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev \
+ libxslt1-dev xsltproc libxml2-utils uuid-runtime -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
 
@@ -303,7 +303,42 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts
+  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts \
+    --disable-avmedia \
+    --disable-database-connectivity \
+    --disable-lpsolve \
+    --disable-coinmp \
+    --disable-gtk \
+    --disable-gtk3 \
+    --disable-systray \
+    --disable-dbus \
+    --disable-gui \
+    --disable-randr \
+    --disable-gstreamer-1-0 \
+    --without-helppack-integration \
+    --enable-python=no \
+    --disable-neon \
+    --disable-cups \
+    --disable-gltf --disable-collada \
+    --enable-introspection=no \
+    --disable-pdfimport \
+    --disable-odk \
+    --disable-extension-update \
+    --without-java \
+    --enable-lto \
+    --enable-eot \
+    --enable-release-build \
+    --with-system-bzip2 \
+    --with-system-zlib \
+    --with-system-jpeg \
+    --with-system-expat \
+    --with-system-libxml \
+    --with-system-icu \
+    --with-system-poppler \
+    --with-system-curl \
+    --with-system-boost \
+    --with-system-libpng \
+    --with-alloc=jemalloc
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   ${lo_forcebuild} && sudo -Hu lool make clean
