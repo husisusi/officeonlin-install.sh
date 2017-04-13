@@ -325,7 +325,6 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   sudo -EHu lool ./autogen.sh --without-help --without-myspell-dicts \
     --libdir=/usr/lib \
     --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
-    --disable-avmedia \
     --disable-database-connectivity \
     --disable-postgresql-sdbc \
     --disable-firebird-sdbc \
