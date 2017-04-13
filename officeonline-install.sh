@@ -294,6 +294,18 @@ if [ ! -f ${lo_dir}/autogen.sh ]; then
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
+# Special Debian/Ubuntu vars for build and make
+# Tools must be installed with dpkg-dev
+DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_HOST_MULTIARCH`
+export DEB_HOST_MULTIARCH
+DEB_HOST_GNU_TYPE=`dpkg-architecture -q DEB_HOST_GNU_TYPE`
+export DEB_HOST_GNU_TYPE
+DEB_BUILD_GNU_TYPE=`dpkg-architecture -q DEB_BUILD_GNU_TYPE`
+export DEB_BUILD_GNU_TYPE
+CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
+CXXFLAGS="$CFLAGS"
+LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
+
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if ${sh_interactive}; then
@@ -305,15 +317,6 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_HOST_MULTIARCH`
-  export DEB_HOST_MULTIARCH
-  DEB_HOST_GNU_TYPE=`dpkg-architecture -q DEB_HOST_GNU_TYPE`
-  export DEB_HOST_GNU_TYPE
-  DEB_BUILD_GNU_TYPE=`dpkg-architecture -q DEB_BUILD_GNU_TYPE`
-  export DEB_BUILD_GNU_TYPE
-  CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
-  CXXFLAGS="$CFLAGS"
-  LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
   export CFLAGS CXXFLAGS LDFLAGS
   # Preserve env vars: sudo -E
   sudo -EHu lool ./autogen.sh --without-help --without-myspell-dicts \
@@ -362,7 +365,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   ${lo_forcebuild} && sudo -Hu lool make clean
-  sudo -Hu lool make
+  sudo -EHu lool make
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 fi
@@ -387,10 +390,10 @@ fi
 # so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
-  sudo -Hu lool ./configure
+  sudo -EHu lool ./configure
   [ $? -ne 0 ] && exit 3
   $poco_forcebuild && sudo -Hu lool make clean
-  sudo -Hu lool make -j${cpu}
+  sudo -EHu lool make -j${cpu}
   [ $? -ne 0 ] && exit 3
   # poco take around 22/${cpu} minutes to compile on fast cpu
   make install
