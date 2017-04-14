@@ -269,7 +269,7 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make ope
  libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
  libpoppler-private-dev libpoppler-cpp-dev libharfbuzz-dev libcairo2-dev libapr1-dev libaprutil1-dev libldap2-dev \
  libgl1-mesa-dev libxt-dev x11proto-render-dev libx11-dev libxrandr-dev libxrender-dev libpq-dev libserf-dev \
- libclucene-dev libxslt1-dev libglew-dev \
+ libclucene-dev libxslt1-dev libglew-dev libglm-dev \
  xsltproc libxml2-utils uuid-runtime gperf -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -371,6 +371,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --with-system-cppunit \
     --with-system-clucene \
     --with-system-glew \
+    --with-system-glm \
     --with-system-boost \
     --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
     --with-system-libpng \
