@@ -267,7 +267,7 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make ope
  libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
  libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
  libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
- libpoppler-private-dev libpoppler-cpp-dev libcairo2-dev libapr1-dev libaprutil1-dev libldap2-dev \
+ libpoppler-private-dev libpoppler-cpp-dev libcairo2-dev libapr1-dev libaprutil1-dev libldap2-dev libnss3-dev libnspr4-dev \
  libgl1-mesa-dev libxt-dev x11proto-render-dev libx11-dev libxrandr-dev libxrender-dev libpq-dev libserf-dev \
  libclucene-dev libxslt1-dev libglew-dev libglm-dev \
  xsltproc libxml2-utils uuid-runtime gperf -y
@@ -374,6 +374,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
     --with-system-clucene \
     --with-system-glew \
     --with-system-glm \
+    --with-system-nss \
     --with-system-boost \
     --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
     --with-system-libpng \
