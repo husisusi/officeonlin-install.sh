@@ -168,6 +168,7 @@ lo_version='' #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
+lo_install_options='--without-help --without-myspell-dicts'
 
 ### POCO parameters ###
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
@@ -300,7 +301,7 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  sudo -Hu lool ./autogen.sh --without-help --without-myspell-dicts
+  sudo -Hu lool ./autogen.sh ${lo_install_options}
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   ${lo_forcebuild} && sudo -Hu lool make clean
