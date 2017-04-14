@@ -324,7 +324,9 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   cd ${lo_dir}
   export CFLAGS CXXFLAGS LDFLAGS
   # Preserve env vars: sudo -E
-  sudo -EHu lool ./autogen.sh --without-help --without-myspell-dicts \
+  sudo -EHu lool ./autogen.sh \
+    --without-parallelism \
+    --without-help --without-myspell-dicts \
     --libdir=/usr/lib \
     --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
     --disable-database-connectivity \
