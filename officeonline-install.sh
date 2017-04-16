@@ -263,6 +263,22 @@ ${sh_interactive} && apt-get install dialog -y
 
 grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get update
 
+# Need to checkout Distrib/Release
+apt-get install lsb-release -y
+
+DIST=`lsb_release -si`
+RELEASE=`lsb_release -sr`
+
+DIST_PKGS=""
+if [ "${DIST}" = "Ubuntu" ]; then
+  DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
+fi
+if [ "${DIST}" = "Debian" ]; then
+  DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
+fi
+# @2017-04-16 No Java, no cry
+DIST_PKGS=""
+
 apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
  libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
  libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
@@ -270,7 +286,8 @@ apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make ope
  libpoppler-private-dev libpoppler-cpp-dev libcairo2-dev libaprutil1-dev libldap2-dev libnss3-dev libnspr4-dev \
  libgl1-mesa-dev libxt-dev x11proto-render-dev libx11-dev libxrandr-dev libxrender-dev libpq-dev libneon27-dev \
  libclucene-dev libxslt1-dev libglew-dev libglm-dev \
- xsltproc libxml2-utils uuid-runtime gperf -y
+ xsltproc libxml2-utils uuid-runtime gperf \
+ ${DIST_PKGS} -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
 
