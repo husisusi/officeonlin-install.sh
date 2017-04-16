@@ -171,6 +171,58 @@ lo_version='' #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
+lo_configure_opts='--without-help --without-myspell-dicts \
+    --without-parallelism \
+    --libdir=/usr/lib \
+    --disable-firebird-sdbc \
+    --disable-lpsolve \
+    --disable-coinmp \
+    --disable-gtk \
+    --disable-gtk3 \
+    --disable-systray \
+    --disable-gio \
+    --disable-dbus \
+    --disable-dconf \
+    --disable-gstreamer-1-0 \
+    --without-helppack-integration \
+    --disable-online-update \
+    --disable-cve-tests \
+    --enable-python=no \
+    --disable-cups \
+    --disable-gltf --disable-collada \
+    --enable-introspection=no \
+    --disable-pdfimport \
+    --disable-odk \
+    --disable-extension-update \
+    --without-java \
+    --without-junit \
+    --without-doxygen \
+    --enable-lto \
+    --enable-eot \
+    --enable-release-build \
+    --with-system-bzip2 \
+    --with-system-zlib \
+    --with-system-jpeg \
+    --with-system-expat \
+    --with-system-libxml \
+    --with-system-icu \
+    --with-system-poppler \
+    --with-system-cairo \
+    --with-system-apr \
+    --with-system-curl \
+    --with-system-neon \
+    --with-system-openssl \
+    --with-system-openldap \
+    --with-system-postgresql \
+    --with-system-cppunit \
+    --with-system-clucene \
+    --with-system-glew \
+    --with-system-glm \
+    --with-system-nss \
+    --with-system-boost \
+    --with-system-libpng \
+    --with-alloc=jemalloc \
+'
 
 ### POCO parameters ###
 poco_version=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
@@ -327,6 +379,13 @@ export DEB_BUILD_GNU_TYPE
 CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
 CXXFLAGS="$CFLAGS"
 LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
+export CFLAGS CXXFLAGS LDFLAGS
+
+# Update lo configure options with host/arch dependant
+lo_configure_opts="${lo_configure_opts} \
+    --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
+    --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
+    "
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
@@ -339,65 +398,11 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  export CFLAGS CXXFLAGS LDFLAGS
   # Preserve env vars: sudo -E
-  sudo -EHu lool ./autogen.sh \
-    --without-parallelism \
-    --without-help --without-myspell-dicts \
-    --libdir=/usr/lib \
-    --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
-    --disable-firebird-sdbc \
-    --disable-lpsolve \
-    --disable-coinmp \
-    --disable-gtk \
-    --disable-gtk3 \
-    --disable-systray \
-    --disable-gio \
-    --disable-dbus \
-    --disable-dconf \
-    --disable-gstreamer-1-0 \
-    --without-helppack-integration \
-    --disable-online-update \
-    --disable-cve-tests \
-    --enable-python=no \
-    --disable-cups \
-    --disable-gltf --disable-collada \
-    --enable-introspection=no \
-    --disable-pdfimport \
-    --disable-odk \
-    --disable-extension-update \
-    --without-java \
-    --without-junit \
-    --without-doxygen \
-    --enable-lto \
-    --enable-eot \
-    --enable-release-build \
-    --with-system-bzip2 \
-    --with-system-zlib \
-    --with-system-jpeg \
-    --with-system-expat \
-    --with-system-libxml \
-    --with-system-icu \
-    --with-system-poppler \
-    --with-system-cairo \
-    --with-system-apr \
-    --with-system-curl \
-    --with-system-neon \
-    --with-system-openssl \
-    --with-system-openldap \
-    --with-system-postgresql \
-    --with-system-cppunit \
-    --with-system-clucene \
-    --with-system-glew \
-    --with-system-glm \
-    --with-system-nss \
-    --with-system-boost \
-    --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
-    --with-system-libpng \
-    --with-alloc=jemalloc
+  sudo -EHu lool ./autogen.sh ${lo_configure_opts}
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
-  ${lo_forcebuild} && sudo -Hu lool make clean
+  ${lo_forcebuild} && sudo -EHu lool make clean
   sudo -EHu lool make
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
@@ -423,6 +428,7 @@ fi
 # so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
+  # Preserve env vars: sudo -E
   sudo -EHu lool ./configure
   [ $? -ne 0 ] && exit 3
   $poco_forcebuild && sudo -Hu lool make clean
