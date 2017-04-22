@@ -1,4 +1,4 @@
-h#!/bin/bash
+#!/bin/bash
 #VERSION 2.2.0
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
