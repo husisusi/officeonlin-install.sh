@@ -47,9 +47,9 @@ This script has been made idempotent: Only the required action will be executed 
 _Example_: when updating **LibreOffice** online to the latest version, **LibreOffice** compilation and installation steps will not be run as it is already installed.
 
 ## Parameters
-Theses parameters describes the expected state of the system regarding LibreOffice Online installation.
+These parameters describes the expected state of the system regarding LibreOffice Online installation.
 
-**The installation can be tuned to your needs by changing theses variables.**
+**The installation can be tuned to your needs by changing these variables.**
 ### LibreOffice:
 - `lo_src_repo`: **LibreOffice** sources are downloaded from this location.
 - `lo_version`: **LibreOffice** version to download. _Empty by default_.
