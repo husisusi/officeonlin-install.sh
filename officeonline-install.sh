@@ -11,6 +11,57 @@
 #or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #You should have received a copy of the GNU General Public License along with
 #this program. If not, see http://www.gnu.org/licenses/.
+help_menu() {
+  echo "Usage:
+
+  ${0##*/} [-h][-l VERSION][-o COMMIT][-p VERSION]
+
+Options:
+
+  -h, --help
+    display this help and exit
+
+  -l, --libreoffice_version)=VERSION
+    Libreoffice Version
+
+  -o, --libreoffice_online_version)=COMMIT
+    Libreoffice Online COMMIT - full hash
+
+  -p, --poco_version)=VERSION
+    Poco Version
+  "
+}
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+      help_menu
+      exit
+     ;;
+    -l|--libreoffice_version)
+    LOVERSION="$2"
+    shift # past argument
+    ;;
+    -o|--libreoffice_online_version)
+    LOOLCOMMIT="$2"
+    shift # past argument
+    ;;
+    -p|--poco_version)
+    POCOVERSION="$2"
+    shift # past argument
+    ;;
+    --default)
+    DEFAULT=YES
+    ;;
+    *)
+            # unknown option
+    ;;
+esac
+shift # past argument or value
+done
 
 if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 
@@ -164,14 +215,15 @@ sh_interactive=true
 
 ### LibreOffice parameters ###
 lo_src_repo='http://download.documentfoundation.org/libreoffice'
-lo_version='' #5.3.1.2
+lo_version=${LOVERSION:-''} #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
 lo_configure_opts='--without-help --without-myspell-dicts'
 
 ### POCO parameters ###
-poco_version=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
+poco_version_latest=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
+poco_version=${POCOVERSION:-$poco_version_latest}
 poco_dir="/opt/poco-${poco_version}-all"
 poco_forcebuild=false
 poco_version_folder=$(curl -s https://pocoproject.org/ | grep -oiE 'The latest stable release is [0-9+]\.[0-9\.]{1,}[0-9]{1,}' | awk '{print $NF}')
@@ -181,7 +233,7 @@ poco_req_vol=550 # minimum space required for Poco compilation, in MB
 lool_src_repo="https://github.com/LibreOffice/online.git"
 # variable precedence: commit > tag > branch
 lool_src_branch='master' # a existing branch name.
-lool_src_commit='' # the full id of a git commit
+lool_src_commit=${LOOLCOMMIT:-''} # the full id of a git commit
 lool_src_tag='' # a tag in the repo git
 lool_dir="/opt/online"
 lool_configure_opts='--enable-debug'
