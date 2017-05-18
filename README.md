@@ -41,6 +41,16 @@ It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlin
 
 Your can manage your service using systemd: `systemctl start|stop|restart|status loolwsd.service`
 
+### Versions
+
+Its possible to pin exact version of the services used, like this:
+
+`./officeonline-install.sh -l 5.3.1.2 -o 47c01440ba794d2ea953d6ac1b80f7e42769f4e -p 1.7.8p2`
+
+There is also a help:
+
+`./officeonline-install.sh -h`
+
 ## Idempotence
 This script has been made idempotent: Only the required action will be executed if it is run several times on the same System in order to get to the expected state.
 
