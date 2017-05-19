@@ -94,7 +94,10 @@ checkAvailableSpace() {
   if [ "${CompFs}" != "/dev/simfs" ]; then
     [ ! -b ${CompFs} ] && echo "Error: ${CompFs} is not a valid filesystem" >&2 && return 2
   fi
-  availableMB=$(df -m --output=avail ${CompFs}|tail -1)
+  availableMB=$(df -m --output=avail ${CompFs} 2>/dev/null |tail -1)
+  if [ -z "${availableMB}" ]; then
+    availableMB=$(df -m --output=source,avail | grep -m1 "^${CompFs}" 2>/dev/null | awk '{print $2}')
+  fi
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"
     echo "Not Enough space available on ${CompName} (${CompRequirement} MiB required)" >&2
@@ -219,7 +222,58 @@ lo_version=${LOVERSION:-''} #5.3.1.2
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
-lo_configure_opts='--without-help --without-myspell-dicts'
+lo_configure_opts='--without-help --without-myspell-dicts \
+    --without-parallelism \
+    --libdir=/usr/lib \
+    --disable-firebird-sdbc \
+    --disable-lpsolve \
+    --disable-coinmp \
+    --disable-gtk \
+    --disable-gtk3 \
+    --disable-systray \
+    --disable-gio \
+    --disable-dbus \
+    --disable-dconf \
+    --disable-gstreamer-1-0 \
+    --without-helppack-integration \
+    --disable-online-update \
+    --disable-cve-tests \
+    --enable-python=no \
+    --disable-cups \
+    --disable-gltf --disable-collada \
+    --enable-introspection=no \
+    --disable-pdfimport \
+    --disable-odk \
+    --disable-extension-update \
+    --without-java \
+    --without-junit \
+    --without-doxygen \
+    --enable-lto \
+    --enable-eot \
+    --enable-release-build \
+    --with-system-bzip2 \
+    --with-system-zlib \
+    --with-system-jpeg \
+    --with-system-expat \
+    --with-system-libxml \
+    --with-system-icu \
+    --with-system-poppler \
+    --with-system-cairo \
+    --with-system-apr \
+    --with-system-curl \
+    --with-system-neon \
+    --with-system-openssl \
+    --with-system-openldap \
+    --with-system-postgresql \
+    --with-system-cppunit \
+    --with-system-clucene \
+    --with-system-glew \
+    --with-system-glm \
+    --with-system-nss \
+    --with-system-boost \
+    --with-system-libpng \
+    --with-alloc=jemalloc \
+'
 
 ### POCO parameters ###
 poco_version_latest=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
@@ -327,11 +381,17 @@ fi
 if [ "${DIST}" = "Debian" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
 fi
+# @2017-04-16 No Java, no cry
+DIST_PKGS=""
 
-apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
- libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
- libcups2-dev gperf doxygen libxslt1-dev xsltproc libxml2-utils python-dev python3-dev libxt-dev libxrender-dev libxrandr-dev \
- uuid-runtime bison flex zip libgtk-3-dev libgtk2.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgl1-mesa-dev ant junit4 \
+apt-get install sudo curl libkrb5-dev systemd python-polib git dpkg-dev make openssl g++ libtool automake m4 ccache pkg-config wget bison flex zip \
+ libpng12-dev libjpeg-dev libpcap0.8 libpcap0.8-dev libbz2-dev zlib1g-dev libicu-dev libpoppler-dev libssl-dev libcurl4-openssl-dev \
+ libboost-dev libboost-date-time-dev libboost-iostreams-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
+ libjemalloc-dev libeot-dev libcunit1 libcunit1-dev libcap-dev libcppunit-dev libfontconfig1-dev libexpat-dev \
+ libpoppler-private-dev libpoppler-cpp-dev libcairo2-dev libaprutil1-dev libldap2-dev libnss3-dev libnspr4-dev \
+ libgl1-mesa-dev libxt-dev x11proto-render-dev libx11-dev libxrandr-dev libxrender-dev libpq-dev libneon27-dev \
+ libclucene-dev libxslt1-dev libglew-dev libglm-dev \
+ xsltproc libxml2-utils uuid-runtime gperf \
  ${DIST_PKGS} -y
 [ $? -ne 0 ] && exit 1
 apt-get build-dep libreoffice -y
@@ -361,6 +421,25 @@ if [ ! -f ${lo_dir}/autogen.sh ]; then
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
+# Special Debian/Ubuntu vars for build and make
+# Tools must be installed with dpkg-dev
+DEB_HOST_MULTIARCH=`dpkg-architecture -q DEB_HOST_MULTIARCH`
+export DEB_HOST_MULTIARCH
+DEB_HOST_GNU_TYPE=`dpkg-architecture -q DEB_HOST_GNU_TYPE`
+export DEB_HOST_GNU_TYPE
+DEB_BUILD_GNU_TYPE=`dpkg-architecture -q DEB_BUILD_GNU_TYPE`
+export DEB_BUILD_GNU_TYPE
+CFLAGS="`dpkg-buildflags --get CFLAGS` `dpkg-buildflags --get CPPFLAGS` -L/usr/lib/${DEB_HOST_MULTIARCH}"
+CXXFLAGS="$CFLAGS"
+LDFLAGS="`dpkg-buildflags --get LDFLAGS` -Wl,-O1 -Wl,--as-needed -L/usr/lib/${DEB_HOST_MULTIARCH}"
+export CFLAGS CXXFLAGS LDFLAGS
+
+# Update lo configure options with host/arch dependant
+lo_configure_opts="${lo_configure_opts} \
+    --host=${DEB_HOST_GNU_TYPE} --build=${DEB_BUILD_GNU_TYPE} \
+    --with-boost-libdir=/usr/lib/${DEB_HOST_MULTIARCH} \
+    "
+
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if ${sh_interactive}; then
@@ -372,11 +451,12 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   fi
   {
   cd ${lo_dir}
-  sudo -Hu lool ./autogen.sh ${lo_configure_opts}
+  # Preserve env vars: sudo -E
+  sudo -EHu lool ./autogen.sh ${lo_configure_opts}
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
-  ${lo_forcebuild} && sudo -Hu lool make clean
-  sudo -Hu lool make
+  ${lo_forcebuild} && sudo -EHu lool make clean
+  sudo -EHu lool make
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 fi
@@ -400,10 +480,11 @@ fi
 # so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
-  sudo -Hu lool ./configure
+  # Preserve env vars: sudo -E
+  sudo -EHu lool ./configure
   [ $? -ne 0 ] && exit 3
   $poco_forcebuild && sudo -Hu lool make clean
-  sudo -Hu lool make -j${cpu}
+  sudo -EHu lool make -j${cpu}
   [ $? -ne 0 ] && exit 3
   # poco take around 22/${cpu} minutes to compile on fast cpu
   make install
