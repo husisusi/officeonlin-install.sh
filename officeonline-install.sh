@@ -21,10 +21,10 @@ Options:
   -h, --help
     display this help and exit
 
-  -l, --libreoffice_version)=VERSION
-    Libreoffice Version
+  -l, --libreoffice_commit)=VERSION
+    Libreoffice COMMIT - full hash
 
-  -o, --libreoffice_online_version)=COMMIT
+  -o, --libreoffice_online_commit)=COMMIT
     Libreoffice Online COMMIT - full hash
 
   -p, --poco_version)=VERSION
@@ -41,11 +41,11 @@ case $key in
       help_menu
       exit
      ;;
-    -l|--libreoffice_version)
-    LOVERSION="$2"
+    -l|--libreoffice_commit)
+    LOCOMMIT="$2"
     shift # past argument
     ;;
-    -o|--libreoffice_online_version)
+    -o|--libreoffice_online_commit)
     LOOLCOMMIT="$2"
     shift # past argument
     ;;
@@ -203,6 +203,61 @@ SearchGitCommit() {
     return 0
   fi
 }
+
+FindOnlineSet() {
+  # Search Libreoffice "core" and "online" repositories for a supposed compatible set of branches
+  # for a better LibreOffice Online experience :)
+  # return 1 branch name for each core and online that match a set
+  # Take 5 arguments:
+  # $1 the set name
+  # $2 the "core" repository url
+  # $3 a expected regex defining the branch name in the core repository
+  # $4 the "online" repository url
+  # $5 a expected regex defining the branch name in the online repository
+  # 1 optional arg:
+  # $6 a desired common version for the set. (latest possible if let unused)
+  local set_name="$1"
+  local core_repo="$2"
+  local core_regex="$3"
+  local online_repo="$4"
+  local online_regex="$5"
+  local set_ver
+  local core_avail
+  local online_avail
+  [ -n "$6" ] && set_ver=$(echo "$6"| tr '-' '.')
+  core_avail=$(git ls-remote --heads $core_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$core_regex")
+  online_avail=$(git ls-remote --heads $online_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$online_regex")
+  [[ (-z "$core_avail") || (-z "$online_avail") ]] && echo "No set found for $set_name">&2 && return 1
+  if [[ ($(echo "$core_avail"| wc -w) -eq 1) && ($(echo "$online_avail"| wc -w) -eq 1) ]]; then
+    echo "$core_avail $online_avail"
+    return 0
+  fi
+  if [ -n "$set_ver" ]; then
+    FindSetVersion() {
+      # nested function for searching a common version number
+      # $@ is a list for branch name
+      local interview
+      local ver_branch_set
+      for candidate in "$@"; do
+        interview=$(echo $candidate | tr '-' '.' | grep $set_ver)
+        [ -n "$interview" ] && ver_branch_set="$ver_branch_set $candidate"
+          # if more than one match (sub version), rely on git sorting the version to get the latest available
+          echo $ver_branch_set|awk '{print $NF}'
+      done
+    }
+    core_avail=$(FindSetVersion $core_avail)
+    online_avail=$(FindSetVersion $online_avail)
+    if [[ ( -z "$core_avail" ) || ( -z "$online_avail" ) ]]; then
+      echo "Unable to find a proper set for $set_name at version $set_ver." >&2
+      return 2
+    fi
+  fi
+    # if more than one match, rely on git sorting the version to get the latest available
+    # /!\ limited results when to much branches
+    echo $core_avail|awk '{print $NF}'
+    echo $online_avail|awk '{print $NF}'
+    return 0
+}
 clear
 ###############################################################################
 ################################# Parameters ##################################
@@ -213,9 +268,25 @@ cpu=$(nproc)
 log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
 sh_interactive=true
 
+### Define a set of version for LibreOffice Core and Online###
+###### THIS WILL OVERRIDE ALL lool_src_* & lo_src_* VARIABLES ########
+# set_name is used to locate branchs folders in the libreoffice project
+#example : distro/collabora/
+### default set is latest version of collabora
+set_name='collabora'
+# set_core_regex & set_online_regex are regulax expression used to find the branch name for core and online
+# example:
+set_core_regex='cp-'
+set_online_regex='collabora-online'
+# set_version can be used if both branch name contains a common version number
+# if empty, latest version available for each project will be used
+set_version=''
+
 ### LibreOffice parameters ###
-lo_src_repo='http://download.documentfoundation.org/libreoffice'
-lo_version=${LOVERSION:-''} #5.3.1.2
+lo_src_repo='https://github.com/LibreOffice/core.git'
+lo_src_branch='master' # a existing branch name.
+lo_src_commit=${LOCOMMIT:-''} # the full id of a git commit
+lo_src_tag='' # a tag in the repo git
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
@@ -249,20 +320,38 @@ lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in
 #clear the logs in case of super multi fast script run.
 [ -f ${log_file} ] && rm ${log_file}
 {
-#verify what version of LibreOffice need to be downloaded if no version has been defined in config
-if [ -z "${lo_version}" ]; then
-  lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-  lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-else
-  lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
-  # FIX when lo_version do not have subtring "libreoffice"
-  [ ${lo_version:0:5} != "libre" ] && lo_version="libreoffice-${lo_version}"
-fi
-# check is libreoffice sources are already present and in the correct version
-if [ -d ${lo_dir} ]; then
-  lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
-  # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
-  [ ${lo_local_version} != ${lo_version} ] && lo_updated=true || lo_updated=false
+# #verify what version of LibreOffice need to be downloaded if no version has been defined in config
+# if [ -z "${lo_version}" ]; then
+#   lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
+#   lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
+# else
+#   lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
+#   # FIX when lo_version do not have subtring "libreoffice"
+#   [ ${lo_version:0:5} != "libre" ] && lo_version="libreoffice-${lo_version}"
+# fi
+# # check is libreoffice sources are already present and in the correct version
+# if [ -d ${lo_dir} ]; then
+#   lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
+#   # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
+#   [ ${lo_local_version} != ${lo_version} ] && lo_updated=true || lo_updated=false
+# fi
+if [ -n "$set_name" ]; then
+  echo "Searching for a set named $set_name..."
+  my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
+  if [ -n "$my_set" ]; then
+    set_core_branch=$(echo $my_set | awk '{print $1}')
+    set_online_branch=$(echo $my_set | awk '{print $2}')
+    if [ "$lo_src_branch" != "$set_core_branch" ]; then
+      lo_src_branch="$set_core_branch"
+      unset lo_src_tag
+      unset lo_src_commit
+    fi
+    if [ "$lool_src_branch" != "$set_online_branch" ]; then
+      lool_src_branch="$set_online_branch"
+      unset lool_src_tag
+      unset lool_src_commit
+    fi
+  fi
 fi
 ###############################################################################
 ############################ System Requirements ##############################
@@ -285,7 +374,7 @@ lool_fs=$(getFilesystem $(dirname $lool_dir)) || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
-if [ ! -d ${lo_dir}/instdir ] || ${lo_updated} ; then
+if [ ! -d ${lo_dir}/instdir ] ; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
 if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
@@ -349,25 +438,43 @@ chown lool:lool /home/lool -R
 ######################## libreoffice compilation ##############################
 {
 # download and extract libreoffice source only if not here
-if [ ! -f ${lo_dir}/autogen.sh ]; then
-  set -e
-  [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P $(dirname ${lo_dir})/
-  [ ! -d $lo_version ] && tar xf $(dirname ${lo_dir})/$lo_version.tar.xz -C  $(dirname ${lo_dir})/
-  set +e
-  # rename the folder if not in the expected version
-  [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} $(dirname ${lo_dir})/${lo_local_version}
-  mv $(dirname ${lo_dir})/$lo_version ${lo_dir}
-  chown lool:lool ${lo_dir} -R
+# if [ ! -f ${lo_dir}/autogen.sh ]; then
+#   set -e
+#   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P "$(dirname ${lo_dir})"/
+#   [ ! -d $lo_version ] && tar xf "$(dirname ${lo_dir})"/$lo_version.tar.xz -C  "$(dirname ${lo_dir})"/
+#   set +e
+#   # rename the folder if not in the expected version
+#   [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} "$(dirname ${lo_dir})"/${lo_local_version}
+#   mv "$(dirname ${lo_dir})"/$lo_version ${lo_dir}
+#   chown lool:lool ${lo_dir} -R
+# fi
+set -e
+SearchGitOpts=''
+[ -n "${lo_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${lo_src_branch}"
+[ -n "${lo_src_commit}" ] && SearchGitOpts="${SearchGitOpts} -c ${lo_src_commit}"
+[ -n "${lo_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -t ${lo_src_tag}"
+#### Download dependencies ####
+if [ -d ${lo_dir} ]; then
+  cd ${lo_dir}
+else
+  git clone ${lo_src_repo} ${lo_dir}
+  cd ${lo_dir}
 fi
+eval "$(SearchGitCommit $SearchGitOpts)"
+if [ -d ${lo_dir}/instdir ] && $repChanged ; then
+  lo_forcebuild=true
+fi
+chown -R lool:lool ${lo_dir}
+set +e
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if ${sh_interactive}; then
     dialog --backtitle "Information" \
-    --title "${lo_version} is going to be built." \
-    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/${cpu})) HOURS (Depending on your CPU's speed),\n"\
-"SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
+    --title "${lo_src_branch} is going to be built." \
+    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/${cpu})) HOURS (Depending on your CPU's speed),\n
+SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
     clear
   fi
   {
