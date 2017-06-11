@@ -53,9 +53,9 @@ case $key in
     POCOVERSION="$2"
     shift # past argument
     ;;
-    --default)
-    DEFAULT=YES
-    ;;
+    #--default)
+    #DEFAULT=YES
+    #;;
     *)
             # unknown option
     ;;
@@ -73,7 +73,7 @@ getFilesystem() {
   # function return the filesystem of a folder
   # arg 1 is an existing folder
   [ ! -d $1 ] &&  echo "error: $1 do not exists or is not a valid directory." >&2 && return 1
-  echo $(df --output=source $1 | tail -1)
+  echo "$(df --output=source $1 | tail -1)"
   return 0
 }
 checkAvailableSpace() {
@@ -97,7 +97,7 @@ checkAvailableSpace() {
   availableMB=$(df -m --output=avail ${CompFs}|tail -1)
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"
-    echo "Not Enough space available on ${CompName} (${CompRequirement} MiB required)" >&2
+    echo "Not Enough space available on ${CompFs} (${CompRequirement} MiB required)" >&2
     echo "(only ${availableMB} MiB available)" >&2
     echo "Exiting." >&2
     return 1
@@ -113,7 +113,7 @@ SearchGitCommit() {
   # Usage = FundGitCommit [--branch|-t [branch name], --commit|-t [commit], --tag|-t [tag]]
   # options precedence: commit > tag > branch > default
   # accept long options with '=' (--branch="master"|--branch master)
-  local rcode=false
+  local rcode=false myBranch myCommit myTag myCommitBranch myTagCommit HeadBranch HeadCommit myTagBranch latestCommit
   if [ ! -d .git ]; then
     # /!\ Current directory must be inside the git repository
     echo "Error: current directory is not a git repository !" >&2
@@ -123,7 +123,7 @@ SearchGitCommit() {
     case $1 in
       "--branch*"|'-b')
         if [[ $1 =~ "=" ]]; then
-          local myBranch=$(echo $1 |cut -d '=' -f2)
+          myBranch=$(echo $1 |cut -d '=' -f2)
           shift 1
         else
           local myBranch=$2
@@ -132,7 +132,7 @@ SearchGitCommit() {
         ;;
       "--commit*"|'-c')
         if [[ $1 =~ "=" ]]; then
-          local myCommit=$(echo $1 |cut -d '=' -f2)
+          myCommit=$(echo $1 |cut -d '=' -f2)
           shift 1
         else
           local myCommit=$2
@@ -141,7 +141,7 @@ SearchGitCommit() {
         ;;
       "--tag*"|'-t')
         if [[ $1 =~ "=" ]]; then
-          local myTag=$(echo $1 |cut -d '=' -f2)
+          myTag=$(echo $1 |cut -d '=' -f2)
           shift 1
         else
           local myTag=$2
@@ -152,8 +152,8 @@ SearchGitCommit() {
     esac
   done
   # getting local info on the repository.
-  local HeadBranch=$(git branch|grep -e ^'*'|awk '{print $NF}')
-  local HeadCommit=$(git rev-parse HEAD)
+  HeadBranch=$(git branch|grep -e '^\*' |awk '{print $NF}')
+  HeadCommit=$(git rev-parse HEAD)
   git fetch
   # checking if args are valid inside the repository
   if [ -n "$myCommit" ]; then
@@ -162,7 +162,7 @@ SearchGitCommit() {
       echo "Error: $myCommit is not a valid commit." >&2
       return 1
     fi
-    local myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
+    myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
     [ "${myCommitBranch}" != "${HeadBranch}" ] && echo "git checkout ${myCommitBranch};" && rcode=true
     [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
     echo "repChanged=$rcode"
@@ -174,8 +174,8 @@ SearchGitCommit() {
        echo "Error: $myTag is not a valid Tag." >&2
        return 1
      fi
-    local myTagCommit=$(git ls-remote -t | grep tags/${myTag}^| awk '{print $1}')
-    local myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
+    myTagCommit=$(git ls-remote -t | grep tags/${myTag}^| awk '{print $1}')
+    myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
     [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
     [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
     echo "repChanged=$rcode"
@@ -188,7 +188,7 @@ SearchGitCommit() {
       return 1
     fi
     #change the remote branch if needed and reset to latestCommit
-    local latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
+    latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
     [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
     [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
     echo "repChanged=$rcode"
@@ -196,8 +196,8 @@ SearchGitCommit() {
   fi
   # if no argument has been given, just get the latest commit of the current checked-out branch.
   # this block is for completion as this function is never going to be called without args here.
-  if [ -z "${myBranch}${myCommit}${mytag}" ]; then
-    local latestCommit=$(git log -1 origin/${HeadBranch}| grep ^commit | awk '{print $NF}')
+  if [ -z "${myBranch}${myCommit}${myTag}" ]; then
+    latestCommit=$(git log -1 origin/${HeadBranch}| grep ^commit | awk '{print $NF}')
     [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
@@ -216,14 +216,7 @@ FindOnlineSet() {
   # $5 a expected regex defining the branch name in the online repository
   # 1 optional arg:
   # $6 a desired common version for the set. (latest possible if let unused)
-  local set_name="$1"
-  local core_repo="$2"
-  local core_regex="$3"
-  local online_repo="$4"
-  local online_regex="$5"
-  local set_ver
-  local core_avail
-  local online_avail
+  local set_name="$1" core_repo="$2" core_regex="$3" online_repo="$4" online_regex="$5" set_ver core_avail online_avail
   [ -n "$6" ] && set_ver=$(echo "$6"| tr '-' '.')
   core_avail=$(git ls-remote --heads $core_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$core_regex")
   online_avail=$(git ls-remote --heads $online_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$online_regex")
@@ -368,16 +361,16 @@ fi
 ### Calculate required disk space per file system ###
 # find the target filesystem for each sw and add the required space for this FS
 # on an array BUT only if no build have been done yet.
-lo_fs=$(getFilesystem $(dirname $lo_dir)) || exit 1
-poco_fs=$(getFilesystem $(dirname $poco_dir)) || exit 1
-lool_fs=$(getFilesystem $(dirname $lool_dir)) || exit 1
+lo_fs=$(getFilesystem "$(dirname $lo_dir)") || exit 1
+poco_fs=$(getFilesystem "$(dirname $poco_dir)") || exit 1
+lool_fs=$(getFilesystem "$(dirname $lool_dir)") || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
 if [ ! -d ${lo_dir}/instdir ] ; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
 fi
-if [ ! -d ${poco_dir} ] || [ $(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null) -lt 100000 ]; then
+if [ ! -d ${poco_dir} ] || [ "$(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null)" -lt 100000 ]; then
   mountPointArray["$poco_fs"]=$((mountPointArray["$poco_fs"]+$poco_req_vol))
 fi
 if [ ! -f ${lool_dir}/loolwsd ]; then
@@ -407,7 +400,7 @@ grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get
 apt-get install lsb-release -y
 
 DIST=`lsb_release -si`
-RELEASE=`lsb_release -sr`
+# RELEASE=`lsb_release -sr`
 
 DIST_PKGS=""
 if [ "${DIST}" = "Ubuntu" ]; then
@@ -460,6 +453,7 @@ else
   git clone ${lo_src_repo} ${lo_dir}
   cd ${lo_dir}
 fi
+declare repChanged
 eval "$(SearchGitCommit $SearchGitOpts)"
 if [ -d ${lo_dir}/instdir ] && $repChanged ; then
   lo_forcebuild=true
@@ -487,15 +481,15 @@ SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore 
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 fi
-
+unset repChanged
 ###############################################################################
 ############################# Poco Installation ###############################
 {
 if [ ! -d $poco_dir ]; then
   #Fix for poco_version being unset after Lo compilation? TODO: Check the case
   [ -z "${poco_version}" ] && poco_version=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
-  wget -c https://pocoproject.org/releases/poco-${poco_version_folder}/poco-${poco_version}-all.tar.gz -P $(dirname $poco_dir)/ || exit 3
-  tar xf $(dirname $poco_dir)/poco-${poco_version}-all.tar.gz -C  $(dirname $poco_dir)/
+  wget -c https://pocoproject.org/releases/poco-${poco_version_folder}/poco-${poco_version}-all.tar.gz -P "$(dirname $poco_dir)"/ || exit 3
+  tar xf "$(dirname $poco_dir)"/poco-${poco_version}-all.tar.gz -C  "$(dirname $poco_dir)"/
   chown lool:lool $poco_dir -R
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
@@ -505,7 +499,7 @@ fi
 ## test if the poco library has already been compiled
 # (the dir size should be around 450000ko vs 65000ko when just extracted)
 # so let say arbitrary : do compilation when folder size is less than 100Mo
-if [ $(du -s ${poco_dir} | awk '{print $1}') -lt 100000 ] || ${poco_forcebuild}; then
+if [ "$(du -s ${poco_dir} | awk '{print $1}')" -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
   sudo -Hu lool ./configure
   [ $? -ne 0 ] && exit 3
@@ -532,7 +526,8 @@ else
   git clone ${lool_src_repo} ${lool_dir}
   cd ${lool_dir}
 fi
-eval $(SearchGitCommit $SearchGitOpts)
+declare repChanged
+eval "$(SearchGitCommit $SearchGitOpts)"
 if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
   lool_forcebuild=true
 fi
@@ -577,7 +572,7 @@ _loolwsd_make_rc=${?} # get the make return code
 ### remove lool group from sudoers
 if [ -f /etc/sudoers ]; then
   sed -i '/^\%lool /d' /etc/sudoers
-  rm $(grep -l '%lool' ${includedir})
+  rm "$(grep -l '%lool' ${includedir})"
 fi
 ##leave if make loowsd has failed
 [ ${_loolwsd_make_rc} -ne 0 ] && exit 4
@@ -630,9 +625,9 @@ if ${sh_interactive}; then
   PASSWORD=$(awk -F'password=' '{printf $2}' /lib/systemd/system/loolwsd.service )
   dialog --backtitle "Information" \
   --title "Note" \
-  --msgbox "The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n"\
-"Your user is admin and password is $PASSWORD. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),\n"\
-"after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\nPlease press OK and wait 15 sec. I will start the service." 10 145
+  --msgbox "The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n
+Your user is admin and password is $PASSWORD. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),\n
+after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\nPlease press OK and wait 15 sec. I will start the service." 10 145
   clear
 fi
 {
