@@ -111,9 +111,11 @@ SearchGitCommit() {
   # (change branch and head to a commit found by search on the repo tree)
   # return also a trigger value "repChanged" that's true if the repo must be updated
   # Usage = FundGitCommit [--branch|-t [branch name], --commit|-t [commit], --tag|-t [tag]]
-  # options precedence: commit > tag > branch > default
+  ##CONSTRAINT : if commit|tag is used it must exist in the current/new branch
+  # options precedence: branch + commit > tag > default
   # accept long options with '=' (--branch="master"|--branch master)
-  local rcode=false myBranch myCommit myTag myCommitBranch myTagCommit HeadBranch HeadCommit myTagBranch latestCommit
+  # accept long and short commit hash
+  local rcode=false myBranch myCommit myTag myTagCommit HeadBranch HeadCommit latestTagCommit latestCommit
   if [ ! -d .git ]; then
     # /!\ Current directory must be inside the git repository
     echo "Error: current directory is not a git repository !" >&2
@@ -156,31 +158,6 @@ SearchGitCommit() {
   HeadCommit=$(git rev-parse HEAD)
   git fetch
   # checking if args are valid inside the repository
-  if [ -n "$myCommit" ]; then
-    if ! git cat-file commit $myCommit >/dev/null; then
-      # check if the commit doesn't exist
-      echo "Error: $myCommit is not a valid commit." >&2
-      return 1
-    fi
-    myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
-    [ "${myCommitBranch}" != "${HeadBranch}" ] && echo "git checkout ${myCommitBranch};" && rcode=true
-    [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
-    echo "repChanged=$rcode"
-    return 0
-  fi
-  if [ -n "$myTag" ]; then
-     if ! git ls-remote -t | grep -q tags/${myTag}^; then
-       # check if the Tag doesn't exist
-       echo "Error: $myTag is not a valid Tag." >&2
-       return 1
-     fi
-    myTagCommit=$(git ls-remote -t | grep tags/${myTag}^| awk '{print $1}')
-    myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
-    [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
-    [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
-    echo "repChanged=$rcode"
-    return 0
-  fi
   if [ -n "$myBranch" ]; then
     if ! git branch -a| grep -q $myBranch; then
       # check if branch doesn't exist localy or remotely, then quit.
@@ -190,7 +167,46 @@ SearchGitCommit() {
     #change the remote branch if needed and reset to latestCommit
     latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
     [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
-    [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
+    # [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
+    # echo "repChanged=$rcode"
+    HeadBranch="$myBranch"
+    # return 0
+  fi
+  if [ -n "$myCommit" ]; then
+    if ! git cat-file commit $myCommit >/dev/null; then
+      # check if the commit doesn't exist
+      echo "Error: $myCommit is not a valid commit." >&2
+      return 1
+    elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -q "$myCommit"; then
+      echo "Error: $myCommit is not in branch $HeadBranch." >&2
+      return 1
+    fi
+    #find the commit's long hash from the short hash
+    myCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
+    # myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
+    # [ "${myCommitBranch}" != "${HeadBranch}" ] && echo "git checkout ${myCommitBranch};" && rcode=true
+    [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  fi
+  if [ -n "$myTag" ]; then
+     if ! git ls-remote -t | grep -q tags/${myTag}^; then
+       # check if the Tag doesn't exist
+       echo "Error: $myTag is not a valid Tag." >&2
+       return 1
+     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -q "tag:.*$myCommit"; then
+       echo "Error: $myTag is not in branch $HeadBranch." >&2
+       return 1
+     fi
+    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -m 1 "tag:.*$myCommit"|awk '{print $1}')
+    # myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
+    # [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
+    [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
+    echo "repChanged=$rcode"
+    return 0
+  else
+    latestTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -m 1 "tag: "|awk '{print $1}')
+    [ "${latestTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${latestTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
   fi
@@ -262,7 +278,7 @@ log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
 sh_interactive=true
 
 ### Define a set of version for LibreOffice Core and Online###
-###### THIS WILL OVERRIDE ALL lool_src_* & lo_src_* VARIABLES ########
+###### THIS WILL OVERRIDE lo_src_branch & lool_src_branch VARIABLES ########
 # set_name is used to locate branchs folders in the libreoffice project
 #example : distro/collabora/
 ### default set is latest version of collabora
@@ -332,18 +348,8 @@ if [ -n "$set_name" ]; then
   echo "Searching for a set named $set_name..."
   my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
   if [ -n "$my_set" ]; then
-    set_core_branch=$(echo $my_set | awk '{print $1}')
-    set_online_branch=$(echo $my_set | awk '{print $2}')
-    if [ "$lo_src_branch" != "$set_core_branch" ]; then
-      lo_src_branch="$set_core_branch"
-      unset lo_src_tag
-      unset lo_src_commit
-    fi
-    if [ "$lool_src_branch" != "$set_online_branch" ]; then
-      lool_src_branch="$set_online_branch"
-      unset lool_src_tag
-      unset lool_src_commit
-    fi
+    lo_src_branch=$(echo $my_set | awk '{print $1}') && echo "core branch: $lo_src_branch"
+    lool_src_branch=$(echo $my_set | awk '{print $2}') && echo "core branch: $lool_src_branch"
   fi
 fi
 ###############################################################################
@@ -450,6 +456,7 @@ SearchGitOpts=''
 if [ -d ${lo_dir} ]; then
   cd ${lo_dir}
 else
+  echo "Cloning Libre Office core (this might take a while) ..."
   git clone ${lo_src_repo} ${lo_dir}
   cd ${lo_dir}
 fi
@@ -473,10 +480,11 @@ SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore 
   fi
   {
   cd ${lo_dir}
+  ${lo_forcebuild} && [ -f ${lo_dir}/configure ] && make clean uninstall
   sudo -Hu lool ./autogen.sh ${lo_configure_opts}
   [ $? -ne 0 ] && exit 2
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
-  ${lo_forcebuild} && sudo -Hu lool make clean
+  # ${lo_forcebuild} && sudo -Hu lool make clean
   sudo -Hu lool make
   [ $? -ne 0 ] && exit 2
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
