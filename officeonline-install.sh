@@ -22,10 +22,10 @@ Options:
     display this help and exit
 
   -l, --libreoffice_commit)=VERSION
-    Libreoffice COMMIT - full hash
+    Libreoffice COMMIT - short/full hash
 
   -o, --libreoffice_online_commit)=COMMIT
-    Libreoffice Online COMMIT - full hash
+    Libreoffice Online COMMIT - short/full hash
 
   -p, --poco_version)=VERSION
     Poco Version
