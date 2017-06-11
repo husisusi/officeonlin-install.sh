@@ -9,7 +9,9 @@ before_install:
   - docker pull koalaman/shellcheck
 
 script:
- - docker run -v $(pwd):/project koalaman/shellcheck /project/officeonline-install.sh
+  # ignore errors:
+  # SC2086: Double quote to prevent globbing and word splitting.
+ - docker run -e SHELLCHECK_OPTS="-e SC2086" -v $(pwd):/project koalaman/shellcheck /project/officeonline-install.sh
 
 matrix:
   fast_finish: true

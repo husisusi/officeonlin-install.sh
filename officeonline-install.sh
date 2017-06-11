@@ -63,17 +63,17 @@ esac
 shift # past argument or value
 done
 
-if [[ `id -u` -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
+if [[ $(id -u) -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 
 randpass() {
   [ "$2" == "0" ] && CHAR="[:alnum:]" || CHAR="[:graph:]"
-  cat /dev/urandom 2>/dev/null | tr -cd "$CHAR" 2>/dev/null | head -c ${1:-32}
+  head -10 /dev/urandom 2>/dev/null | tr -cd "$CHAR" 2>/dev/null | head -c ${1:-32}
 }
 getFilesystem() {
   # function return the filesystem of a folder
   # arg 1 is an existing folder
   [ ! -d $1 ] &&  echo "error: $1 do not exists or is not a valid directory." >&2 && return 1
-  echo "$(df --output=source $1 | tail -1)"
+  df --output=source $1 | tail -1
   return 0
 }
 checkAvailableSpace() {
@@ -194,18 +194,18 @@ SearchGitCommit() {
        # check if the Tag doesn't exist
        echo "Error: $myTag is not a valid Tag." >&2
        return 1
-     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -q "tag:.*$myCommit"; then
+     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Eq "tag:.*$myCommit"; then
        echo "Error: $myTag is not in branch $HeadBranch." >&2
        return 1
      fi
-    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -m 1 "tag:.*$myCommit"|awk '{print $1}')
+    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myCommit"|awk '{print $1}')
     # myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
     # [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
     [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
   else
-    latestTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | egrep -m 1 "tag: "|awk '{print $1}')
+    latestTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag: "|awk '{print $1}')
     [ "${latestTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${latestTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
@@ -234,8 +234,8 @@ FindOnlineSet() {
   # $6 a desired common version for the set. (latest possible if let unused)
   local set_name="$1" core_repo="$2" core_regex="$3" online_repo="$4" online_regex="$5" set_ver core_avail online_avail
   [ -n "$6" ] && set_ver=$(echo "$6"| tr '-' '.')
-  core_avail=$(git ls-remote --heads $core_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$core_regex")
-  online_avail=$(git ls-remote --heads $online_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|egrep "$online_regex")
+  core_avail=$(git ls-remote --heads $core_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|grep -E "$core_regex")
+  online_avail=$(git ls-remote --heads $online_repo "*$set_name*"|awk '{print $2}'|sed 's/refs\/heads\///g'|grep -E "$online_regex")
   [[ (-z "$core_avail") || (-z "$online_avail") ]] && echo "No set found for $set_name">&2 && return 1
   if [[ ($(echo "$core_avail"| wc -w) -eq 1) && ($(echo "$online_avail"| wc -w) -eq 1) ]]; then
     echo "$core_avail $online_avail"
@@ -374,13 +374,13 @@ lool_fs=$(getFilesystem "$(dirname $lool_dir)") || exit 1
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
 if [ ! -d ${lo_dir}/instdir ] ; then
-  mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+$lo_req_vol))
+  mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+lo_req_vol))
 fi
 if [ ! -d ${poco_dir} ] || [ "$(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null)" -lt 100000 ]; then
-  mountPointArray["$poco_fs"]=$((mountPointArray["$poco_fs"]+$poco_req_vol))
+  mountPointArray["$poco_fs"]=$((mountPointArray["$poco_fs"]+poco_req_vol))
 fi
 if [ ! -f ${lool_dir}/loolwsd ]; then
-  mountPointArray["$lool_fs"]=$((mountPointArray["$poco_fs"]+$lool_req_vol))
+  mountPointArray["$lool_fs"]=$((mountPointArray["$poco_fs"]+lool_req_vol))
 fi
 # test if each file system used have the required space.
 # if there's nothing to (force-)build (so 0 FS to verify), the script leave here.
@@ -405,7 +405,7 @@ grep -q '# deb-src' ${soli} && sed -i 's/# deb-src/deb-src/g' ${soli} && apt-get
 # Need to checkout Distrib/Release
 apt-get install lsb-release -y
 
-DIST=`lsb_release -si`
+DIST=$(lsb_release -si)
 # RELEASE=`lsb_release -sr`
 
 DIST_PKGS=""
@@ -416,12 +416,13 @@ if [ "${DIST}" = "Debian" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
 fi
 
-apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
+if ! apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
  libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
  libcups2-dev gperf doxygen libxslt1-dev xsltproc libxml2-utils python-dev python3-dev libxt-dev libxrender-dev libxrandr-dev \
  uuid-runtime bison flex zip libgtk-3-dev libgtk2.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgl1-mesa-dev ant junit4 nasm \
- ${DIST_PKGS} -y
-[ $? -ne 0 ] && exit 1
+ ${DIST_PKGS} -y; then
+   exit 1
+ fi
 apt-get build-dep libreoffice -y
 
 if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
@@ -474,19 +475,18 @@ if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
   if ${sh_interactive}; then
     dialog --backtitle "Information" \
     --title "${lo_src_branch} is going to be built." \
-    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/${cpu})) HOURS (Depending on your CPU's speed),\n
+    --msgbox "THE COMPILATION WILL TAKE REALLY A VERY LONG TIME,\nAROUND $((16/cpu)) HOURS (Depending on your CPU's speed),\n
 SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore them and let it do the work." 10 78
     clear
   fi
   {
   cd ${lo_dir}
   ${lo_forcebuild} && [ -f ${lo_dir}/configure ] && make clean uninstall
-  sudo -Hu lool ./autogen.sh ${lo_configure_opts}
-  [ $? -ne 0 ] && exit 2
+  if ! sudo -Hu lool ./autogen.sh ${lo_configure_opts}; then exit 2; fi
+
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   # ${lo_forcebuild} && sudo -Hu lool make clean
-  sudo -Hu lool make
-  [ $? -ne 0 ] && exit 2
+  if ! sudo -Hu lool make; then exit 2; fi
   } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 fi
 unset repChanged
@@ -509,14 +509,11 @@ fi
 # so let say arbitrary : do compilation when folder size is less than 100Mo
 if [ "$(du -s ${poco_dir} | awk '{print $1}')" -lt 100000 ] || ${poco_forcebuild}; then
   cd "$poco_dir"
-  sudo -Hu lool ./configure
-  [ $? -ne 0 ] && exit 3
+  sudo -Hu lool ./configure || exit 3
   $poco_forcebuild && sudo -Hu lool make clean
-  sudo -Hu lool make -j${cpu}
-  [ $? -ne 0 ] && exit 3
+  sudo -Hu lool make -j${cpu} || exit 3
   # poco take around 22/${cpu} minutes to compile on fast cpu
-  make install
-  [ $? -ne 0 ] && exit 3
+  make install || exit 3
 fi
 } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
 ###############################################################################
@@ -572,8 +569,7 @@ cd ${lool_dir}
 ${lool_forcebuild} && [ -f ${lool_dir}/configure ] && make clean uninstall
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
-sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}"
-[ $? -ne 0 ] && exit 4
+sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" || exit 4
 # loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 sudo -Hu lool make -j$cpu --directory=${lool_dir}
 _loolwsd_make_rc=${?} # get the make return code
@@ -642,11 +638,10 @@ fi
 sudo -Hu lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${lo_dir}/workdir
 sleep 18
-ps -u lool | grep loolwsd
-if [ $?  -eq "0" ]; then
+if pgrep -u lool loolwsd; then
   echo -e "\033[33;7m### loolwsd is running. Enjoy!!! Service will be stopped after this ###\033[0m"
   lsof -i :9980
-  ps -u lool -o pid,cmd | grep loolwsd |awk '{print $1}' | xargs kill
+  pgrep -u lool loolwsd -signal kill
   systemctl enable loolwsd.service
   systemctl daemon-reload
 else
