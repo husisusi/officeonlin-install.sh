@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.2.0
+#VERSION 2.3.0
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -167,8 +167,6 @@ SearchGitCommit() {
     #change the remote branch if needed and reset to latestCommit
     latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
     [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
-    # [ ${latestCommit} != ${HeadCommit} ] && echo "git reset --hard ${latestCommit};" && rcode=true
-    # echo "repChanged=$rcode"
     HeadBranch="$myBranch"
     # return 0
   fi
@@ -183,8 +181,6 @@ SearchGitCommit() {
     fi
     #find the commit's long hash from the short hash
     myCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
-    # myCommitBranch=$(git branch --contains ${myCommit}| awk '{print $NF}') # fix for case when found branch is Headbranch
-    # [ "${myCommitBranch}" != "${HeadBranch}" ] && echo "git checkout ${myCommitBranch};" && rcode=true
     [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
@@ -199,8 +195,6 @@ SearchGitCommit() {
        return 1
      fi
     myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myCommit"|awk '{print $1}')
-    # myTagBranch=$(git branch --contains ${myTagCommit}| awk '{print $NF}')  # fix for case when found branch is Headbranch
-    # [ "${myTagBranch}" != "${HeadBranch}" ] && echo "git checkout ${myTagBranch};" && rcode=true
     [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
@@ -329,21 +323,6 @@ lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in
 #clear the logs in case of super multi fast script run.
 [ -f ${log_file} ] && rm ${log_file}
 {
-# #verify what version of LibreOffice need to be downloaded if no version has been defined in config
-# if [ -z "${lo_version}" ]; then
-#   lo_stable=$(curl -s ${lo_src_repo}/stable/ | grep -oiE '^.*href="([0-9+]\.)+[0-9]/"'| tail -1 | sed 's/.*href="\(.*\)\/"$/\1/')
-#   lo_version=$(curl -s ${lo_src_repo}/src/${lo_stable}/ | grep -oiE 'libreoffice-5.[0-9+]\.[0-9+]\.[0-9]' | awk 'NR == 1')
-# else
-#   lo_stable=$(echo ${lo_version} | cut -d '.' -f1-3)
-#   # FIX when lo_version do not have subtring "libreoffice"
-#   [ ${lo_version:0:5} != "libre" ] && lo_version="libreoffice-${lo_version}"
-# fi
-# # check is libreoffice sources are already present and in the correct version
-# if [ -d ${lo_dir} ]; then
-#   lo_local_version="libreoffice-$(grep PACKAGE_VERSION=\' ${lo_dir}/configure | cut -d \' -f 2)"
-#   # if LO is NOT in the expected version, force the space requirement for it will be rebuilt again.
-#   [ ${lo_local_version} != ${lo_version} ] && lo_updated=true || lo_updated=false
-# fi
 if [ -n "$set_name" ]; then
   echo "Searching for a set named $set_name..."
   my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
@@ -437,17 +416,6 @@ chown lool:lool /home/lool -R
 ###############################################################################
 ######################## libreoffice compilation ##############################
 {
-# download and extract libreoffice source only if not here
-# if [ ! -f ${lo_dir}/autogen.sh ]; then
-#   set -e
-#   [ ! -f $lo_version.tar.xz ] && wget -c ${lo_src_repo}/src/${lo_stable}/$lo_version.tar.xz -P "$(dirname ${lo_dir})"/
-#   [ ! -d $lo_version ] && tar xf "$(dirname ${lo_dir})"/$lo_version.tar.xz -C  "$(dirname ${lo_dir})"/
-#   set +e
-#   # rename the folder if not in the expected version
-#   [ ${lo_local_version} != ${lo_version} ] && mv ${lo_dir} "$(dirname ${lo_dir})"/${lo_local_version}
-#   mv "$(dirname ${lo_dir})"/$lo_version ${lo_dir}
-#   chown lool:lool ${lo_dir} -R
-# fi
 set -e
 SearchGitOpts=''
 [ -n "${lo_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${lo_src_branch}"
