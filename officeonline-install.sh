@@ -199,12 +199,14 @@ SearchGitCommit() {
     echo "repChanged=$rcode"
     return 0
   else
-    latestTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag: "|awk '{print $1}')
+    # if no argument has been given, just get the latest tag of the branch.
+    latestTag=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag: ")
+    latestTagCommit=$(echo "$latestTag"|awk '{print $1}')
+    echo "echo Selected Tag: $(echo ${latestTag} | sed 's/.*tag: \(.*\)[)].*/\1/') ${latestTag:0:7}"
     [ "${latestTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${latestTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
   fi
-  # if no argument has been given, just get the latest commit of the current checked-out branch.
   # this block is for completion as this function is never going to be called without args here.
   if [ -z "${myBranch}${myCommit}${myTag}" ]; then
     latestCommit=$(git log -1 origin/${HeadBranch}| grep ^commit | awk '{print $NF}')
@@ -327,8 +329,8 @@ if [ -n "$set_name" ]; then
   echo "Searching for a set named $set_name..."
   my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
   if [ -n "$my_set" ]; then
-    lo_src_branch=$(echo $my_set | awk '{print $1}') && echo "core branch: $lo_src_branch"
-    lool_src_branch=$(echo $my_set | awk '{print $2}') && echo "core branch: $lool_src_branch"
+    lo_src_branch=$(echo $my_set | awk '{print $1}') && echo "Core branch: $lo_src_branch"
+    lool_src_branch=$(echo $my_set | awk '{print $2}') && echo "Online branch: $lool_src_branch"
   fi
 fi
 ###############################################################################
@@ -395,7 +397,7 @@ if [ "${DIST}" = "Debian" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
 fi
 
-if ! apt-get install sudo curl libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
+if ! apt-get install sudo curl procps libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
  libcunit1 libcunit1-dev libpng12-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
  libcups2-dev gperf doxygen libxslt1-dev xsltproc libxml2-utils python-dev python3-dev libxt-dev libxrender-dev libxrandr-dev \
  uuid-runtime bison flex zip libgtk-3-dev libgtk2.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgl1-mesa-dev ant junit4 nasm \
