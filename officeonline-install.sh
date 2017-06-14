@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.3.0
+#VERSION 2.3.1
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -611,7 +611,7 @@ sleep 18
 if pgrep -u lool loolwsd; then
   echo -e "\033[33;7m### loolwsd is running. Enjoy!!! Service will be stopped after this ###\033[0m"
   lsof -i :9980
-  pgrep -u lool loolwsd -signal kill
+  pkill -u lool loolwsd
   systemctl enable loolwsd.service
   systemctl daemon-reload
 else
