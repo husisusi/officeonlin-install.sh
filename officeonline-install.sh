@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.3.1
+#VERSION 2.3.2
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -270,7 +270,7 @@ clear
 ### Script parameters ###
 soli="/etc/apt/sources.list"
 cpu=$(nproc)
-log_file="/tmp/$(date +'%Y%m%d-%H%M')_officeonline.log"
+log_dir="$PWD/$(date +'%Y%m%d-%H%M')_officeonline-install"
 sh_interactive=true
 
 ### Define a set of version for LibreOffice Core and Online###
@@ -323,7 +323,13 @@ lool_req_vol=650 # minimum space required for LibreOffice Online compilation, in
 ################################# OPERATIONS ##################################
 ###############################################################################
 #clear the logs in case of super multi fast script run.
-[ -f ${log_file} ] && rm ${log_file}
+[ "${log_dir}" = '/' ] && exit 100 # just to be safe
+[ -f ${log_dir} ] && rm -rf ${log_dir}
+mkdir -p ${log_dir}
+touch ${log_dir}/preparation.log
+touch ${log_dir}/LO-compilation.log
+touch ${log_dir}/POCO-compilation.log
+touch ${log_dir}/Lool-compilation.log
 {
 if [ -n "$set_name" ]; then
   echo "Searching for a set named $set_name..."
@@ -413,7 +419,7 @@ fi
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/preparation.log) 2> >(tee -a ${log_dir}/preparation.log >&2)
 
 ###############################################################################
 ######################## libreoffice compilation ##############################
@@ -438,7 +444,7 @@ if [ -d ${lo_dir}/instdir ] && $repChanged ; then
 fi
 chown -R lool:lool ${lo_dir}
 set +e
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/LO-compilation.log) 2> >(tee -a ${log_dir}/LO-compilation.log >&2)
 
 # build LibreOffice if it has'nt been built already or lo_forcebuild is true
 if [ ! -d ${lo_dir}/instdir ] || ${lo_forcebuild}; then
@@ -457,7 +463,7 @@ SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore 
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   # ${lo_forcebuild} && sudo -Hu lool make clean
   if ! sudo -Hu lool make; then exit 2; fi
-  } > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+  } > >(tee -a ${log_dir}/LO-compilation.log) 2> >(tee -a ${log_dir}/LO-compilation.log >&2)
 fi
 unset repChanged
 ###############################################################################
@@ -470,7 +476,7 @@ if [ ! -d $poco_dir ]; then
   tar xf "$(dirname $poco_dir)"/poco-${poco_version}-all.tar.gz -C  "$(dirname $poco_dir)"/
   chown lool:lool $poco_dir -R
 fi
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/POCO-compilation.log) 2> >(tee -a ${log_dir}/POCO-compilation.log >&2)
 
 ######## Poco Build ########
 {
@@ -485,7 +491,7 @@ if [ "$(du -s ${poco_dir} | awk '{print $1}')" -lt 100000 ] || ${poco_forcebuild
   # poco take around 22/${cpu} minutes to compile on fast cpu
   make install || exit 3
 fi
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/POCO-compilation.log) 2> >(tee -a ${log_dir}/POCO-compilation.log >&2)
 ###############################################################################
 ########################### loolwsd Installation ##############################
 {
@@ -593,13 +599,13 @@ fi
 if [ ! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
 fi
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/Lool-compilation.log) 2> >(tee -a ${log_dir}/Lool-compilation.log >&2)
 ### Testing loolwsd ###
 if ${sh_interactive}; then
   PASSWORD=$(awk -F'password=' '{printf $2}' /lib/systemd/system/loolwsd.service )
   dialog --backtitle "Information" \
   --title "Note" \
-  --msgbox "The installation log file is in ${log_file}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n
+  --msgbox "The installation logs are in ${log_dir}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\n
 Your user is admin and password is $PASSWORD. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),\n
 after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\nPlease press OK and wait 15 sec. I will start the service." 10 145
   clear
@@ -615,7 +621,7 @@ if pgrep -u lool loolwsd; then
   systemctl enable loolwsd.service
   systemctl daemon-reload
 else
-  echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_file} or try to restart your system ###\033[0m"
+  echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_dir} or try to restart your system ###\033[0m"
 fi
-} > >(tee -a ${log_file}) 2> >(tee -a ${log_file} >&2)
+} > >(tee -a ${log_dir}/Lool-compilation.log) 2> >(tee -a ${log_dir}/Lool-compilation.log >&2)
 exit 0
