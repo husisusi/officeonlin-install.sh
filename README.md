@@ -1,6 +1,6 @@
 # officeonline-install.sh
 ---
-Script intended to build & install Office Online on Ubuntu 16.04 and Debian 8.7 systems.
+Script intended to build & install Office Online on Ubuntu 16.04 and Debian 8.8 systems.
 
 Written by: Subhi H. & Marc C.
 
@@ -11,8 +11,12 @@ Written by: Subhi H. & Marc C.
 * [Requirements](#requirements)
 * [Notice](#notice)
 * [Default Installation](#default-installation)
+  * [Sets](#sets)
+  * [Versions](#versions)
+* [Default Installation](#default-installation)
 * [Idempotence](#idempotence)
 * [Parameters](#parameters)
+  * [Sets](#set-parameters)
   * [LibreOffice](#libreoffice)
   * [Poco](#poco)
   * [Lool](#lool)
@@ -20,7 +24,7 @@ Written by: Subhi H. & Marc C.
     * [Compilation options](#compilation-options)
 * [Nota Bene](#nota-bene)
 
-## GNUv3 Licence
+## GNUv3 License
 > This script is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 > This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
@@ -41,6 +45,12 @@ It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlin
 
 Your can manage your service using systemd: `systemctl start|stop|restart|status loolwsd.service`
 
+### Sets
+Since v2.1, it is possible to choose a **Set**.
+A set is an duo of branches from both LibreOffice core and online git repositories that are known to create a smooth LO-Online experience.
+
+**By default latest version available of collabora**
+
 ### Versions
 
 Its possible to pin exact version of the services used, like this:
@@ -60,12 +70,28 @@ _Example_: when updating **LibreOffice** online to the latest version, **LibreOf
 These parameters describes the expected state of the system regarding LibreOffice Online installation.
 
 **The installation can be tuned to your needs by changing these variables.**
+
+### Set Parameters:
+- `set_name`: used to locate branchs folders in the libreoffice project. _'collabora' by default_
+- `set_core_regex`: regulax expression used to find the branch name for core _'cp-' by default._
+- `set_online_regex`: regulax expression used to find the branch name for online _'collabora-online' by default._
+- `set_version` can be used **if both** branch name contains a common version number.
+Else, latest version available for each project will be used. _empty by default_
+
 ### LibreOffice:
-- `lo_src_repo`: **LibreOffice** sources are downloaded from this location.
-- `lo_version`: **LibreOffice** version to download. _Empty by default_.
-When empty, the script will download the latest stable version available.
-- `lo_dir`: **LibreOffice** sources directory. _`/opt/libreoffice` by default_.
+For Idempotence, LO's status is defined by its sources' commit id.
+- `lo_dir`: The installation directory for _Lo_. _`/opt/online` by default_.
 - `lo_forcebuild`: A **boolean** to override idempotence and force *LibreOffice* compilation and installation. _`false` by default_.
+- `lo_configure_opts`: free form string to add even more options ! _`--without-help --without-myspell-dicts --without-java` by default_. **For experts only!**
+_Each update of the sources by the script will trigger a **lO** compilation & installation_
+- `lo_src_repo`: the Git repository _"https://github.com/LibreOffice/core.git"_
+- `lo_src_branch`: an existing branch name. It pull the latest Tag available _`master` by default_
+- One of the 2:
+  - `lo_src_commit`:  the id of a git commit in the selected branch. _`empty` by default_
+  - `lo_src_tag`: a tag in the selected branch. _`empty` by default_
+
+If more than one is defined, a choice is made:
+- _choice precedence_: **Commit** over **tag**
 
 ### POCO:
 Poco is an opensource C++ library for network based project. It is required by LibreOffice Online.

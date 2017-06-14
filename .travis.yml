@@ -1,0 +1,18 @@
+sudo: required
+
+language: bash
+
+services:
+  - docker
+
+before_install:
+  - docker pull koalaman/shellcheck
+
+script:
+  # ignore errors:
+  # SC2086: Double quote to prevent globbing and word splitting.
+  # SC2001: See if you can use ${variable//search/replace} instead.
+ - docker run -e SHELLCHECK_OPTS="-e SC2086 -e SC2001" -v $(pwd):/project koalaman/shellcheck /project/officeonline-install.sh
+
+matrix:
+  fast_finish: true
