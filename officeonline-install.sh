@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.3.2
+#VERSION 2.3.3
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -523,8 +523,13 @@ fi
 #### loolwsd & loleaflet Build ##
  # Idempotence : do not recompile loolwsd, install & test if already done
 if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
+  if $lo_forcebuild; then
+    #fixe case when Libreoffice core have been recompiled after online
+    setcap cap_fowner,cap_mknod,cap_sys_chroot=ep /opt/online/loolforkit
+    setcap cap_sys_admin=ep /opt/online/loolmount
+  fi
   # leave if loowsd is already compiled and lool_forcebuild is not true.
-  echo -e "Loolwsd is already compiled and I'm not forced to recompile.\nLeaving here..."
+  echo -e "Loolwsd is already in the expected state and I'm not forced to rebuild.\nLeaving here..."
   exit 1
 fi
 
