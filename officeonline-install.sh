@@ -295,7 +295,7 @@ lo_src_tag='' # a tag in the repo git
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
-lo_configure_opts='--without-help --without-myspell-dicts --without-java'
+lo_configure_opts='--without-help --without-myspell-dicts --without-java --disable-cve-tests'
 
 ### POCO parameters ###
 poco_version_latest=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
