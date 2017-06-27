@@ -417,6 +417,11 @@ if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
   apt-get install nodejs -y
 fi
 
+if [ ! -f /usr/share/fonts/truetype/msttcorefonts/times.ttf ]; then
+echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+apt-get install ttf-mscorefonts-installer -y
+fi
+
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
 chown lool:lool /home/lool -R
 } > >(tee -a ${log_dir}/preparation.log) 2> >(tee -a ${log_dir}/preparation.log >&2)
