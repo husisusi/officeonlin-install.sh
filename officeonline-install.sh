@@ -296,6 +296,7 @@ lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
 lo_configure_opts='--without-help --without-myspell-dicts --without-java'
+lo_non_free_ttf=false
 
 ### POCO parameters ###
 poco_version_latest=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
@@ -417,9 +418,11 @@ if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
   apt-get install nodejs -y
 fi
 
-if [ ! -f /usr/share/fonts/truetype/msttcorefonts/times.ttf ]; then
-echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
-apt-get install ttf-mscorefonts-installer -y
+if [ "${lo_non_free_ttf}" = "true" ]; then
+   if [ ! -f /usr/share/fonts/truetype/msttcorefonts/times.ttf ]; then
+   echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+   apt-get install ttf-mscorefonts-installer -y
+   fi
 fi
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
