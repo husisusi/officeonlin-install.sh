@@ -296,6 +296,7 @@ lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
 lo_configure_opts='--without-help --without-myspell-dicts --without-java'
+lo_non_free_ttf=false # add Microsoft fonts to Ubuntu
 
 ### POCO parameters ###
 poco_version_latest=$(curl -s https://pocoproject.org/ | awk -F'The latest stable release is ' '{printf $2}' | grep -Eo '^[^ ]+.\w')
@@ -415,6 +416,11 @@ apt-get build-dep libreoffice -y
 if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
   curl -sL https://deb.nodesource.com/setup_6.x | bash -
   apt-get install nodejs -y
+fi
+
+if ${lo_non_free_ttf}; then
+echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+apt-get install ttf-mscorefonts-installer -y
 fi
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
