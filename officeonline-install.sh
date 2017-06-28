@@ -421,6 +421,7 @@ fi
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 apt-get install ttf-mscorefonts-installer -y
+echo "If Libreoffice is already compiled a recompile may be necessary before fonts can be used."
 fi
 
 getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
