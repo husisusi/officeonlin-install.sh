@@ -529,11 +529,9 @@ fi
 #### loolwsd & loleaflet Build ##
  # Idempotence : do not recompile loolwsd, install & test if already done
 if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
-  if $lo_forcebuild; then
-    #fixe case when Libreoffice core have been recompiled after online
+  # After running script file capabilities are changed.
     setcap cap_fowner,cap_mknod,cap_sys_chroot=ep ${lool_dir}/loolforkit
     setcap cap_sys_admin=ep ${lool_dir}/loolmount
-  fi
   # leave if loowsd is already compiled and lool_forcebuild is not true.
   echo -e "Loolwsd is already in the expected state and I'm not forced to rebuild.\nLeaving here..."
   exit 1
