@@ -294,8 +294,8 @@ lo_src_commit=${LOCOMMIT:-''} # the full id of a git commit
 lo_src_tag='' # a tag in the repo git
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
-lo_req_vol=12000 # minimum space required for LibreOffice compilation, in MB
-lo_configure_opts='--without-help --without-myspell-dicts --without-java'
+lo_req_vol=11000 # minimum space required for LibreOffice compilation, in MB
+lo_configure_opts='--without-help --without-myspell-dicts --without-java --without-doxygen'
 lo_non_free_ttf=false # add Microsoft fonts to Ubuntu
 
 ### POCO parameters ###
