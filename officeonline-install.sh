@@ -599,8 +599,10 @@ if [ ! -f /etc/loolwsd/ca-chain.cert.pem ]; then
   mkdir /etc/loolwsd
   openssl genrsa -out /etc/loolwsd/key.pem 4096
   openssl req -out /etc/loolwsd/cert.csr -key /etc/loolwsd/key.pem -new -sha256 -nodes -subj "/C=DE/OU=onlineoffice-install.com/CN=onlineoffice-install.com/emailAddress=nomail@nodo.com"
-  openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/cert.pem
-  openssl x509 -req -days 365 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/ca-chain.cert.pem
+  openssl x509 -req -days 1825 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/cert.pem
+  openssl x509 -req -days 1825 -in /etc/loolwsd/cert.csr -signkey /etc/loolwsd/key.pem -out /etc/loolwsd/ca-chain.cert.pem
+  chown lool:lool /etc/loolwsd/key.pem
+  chmod 600 /etc/loolwsd/key.pem
 fi
 if [ ! -e /etc/systemd/system/loolwsd.service ]; then
   ln /lib/systemd/system/loolwsd.service /etc/systemd/system/loolwsd.service
