@@ -202,7 +202,7 @@ SearchGitCommit() {
     # if no argument has been given, just get the latest tag of the branch.
     latestTag=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag: ")
     latestTagCommit=$(echo "$latestTag"|awk '{print $1}')
-    echo "echo Selected Tag: $(echo ${latestTag} | sed 's/.*tag: \(.*\)[)].*/\1/') ${latestTag:0:7}"
+    echo "echo \"Selected Tag: $(echo ${latestTag} | sed 's/.*tag: \(.*\)[)] .*/\1/') ${latestTag:0:7}\""
     [ "${latestTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${latestTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
