@@ -82,7 +82,7 @@ Else, latest version available for each project will be used. _empty by default_
 For Idempotence, LO's status is defined by its sources' commit id.
 - `lo_dir`: The installation directory for _Lo_. _`/opt/online` by default_.
 - `lo_forcebuild`: A **boolean** to override idempotence and force *LibreOffice* compilation and installation. _`false` by default_.
-- `lo_configure_opts`: free form string to add even more options ! _`--without-help --without-myspell-dicts --without-java` by default_. **For experts only!**
+- `lo_configure_opts`: free form string to add even more options ! _`--without-help --without-myspell-dicts --without-java  --without-doxygen` by default_. **For experts only!**
 _Each update of the sources by the script will trigger a **lO** compilation & installation_
 - `lo_src_repo`: the Git repository _"https://github.com/LibreOffice/core.git"_
 - `lo_src_branch`: an existing branch name. It pull the latest Tag available _`master` by default_
