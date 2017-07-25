@@ -313,7 +313,7 @@ lool_src_branch='master' # a existing branch name.
 lool_src_commit=${LOOLCOMMIT:-''} # the full id of a git commit
 lool_src_tag='' # a tag in the repo git
 lool_dir="/opt/online"
-lool_configure_opts='--enable-debug'
+lool_configure_opts='' # --enable-debug
 lool_logfile='/var/log/loolwsd.log'
 lool_forcebuild=false
 lool_maxcon=200
@@ -585,7 +585,7 @@ EnvironmentFile=-/etc/sysconfig/loolwsd
 ExecStartPre=/bin/mkdir -p /usr/local/var/cache/loolwsd
 ExecStartPre=/bin/chown lool: /usr/local/var/cache/loolwsd
 PermissionsStartOnly=true
-ExecStart=${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
+ExecStart=${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:admin_console.username=admin --o:admin_console.password=$PASSWORD
 User=lool
 KillMode=control-group
 # Restart=always
@@ -619,7 +619,7 @@ after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\n
   clear
 fi
 {
-sudo -Hu lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin &"
+sudo -Hu lool bash -c "${lool_dir}/loolwsd --o:sys_template_path=${lool_dir}/systemplate --o:lo_template_path=${lo_dir}/instdir  --o:child_root_path=${lool_dir}/jails --o:admin_console.username=admin --o:admin_console.password=admin &"
 rm -rf ${lo_dir}/workdir
 sleep 18
 if pgrep -u lool loolwsd; then
