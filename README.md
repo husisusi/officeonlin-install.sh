@@ -22,6 +22,7 @@ Written by: Marc C. & Subhi H.
   * [Lool](#lool)
     * [Sources status](#sources-status)
     * [Compilation options](#compilation-options)
+* [Debug](#debug)
 * [Nota Bene](#nota-bene)
 
 ## GNUv3 License
