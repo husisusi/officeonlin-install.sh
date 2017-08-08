@@ -295,7 +295,7 @@ lo_src_tag='' # a tag in the repo git
 lo_dir="/opt/libreoffice"
 lo_forcebuild=false # force compilation
 lo_req_vol=11000 # minimum space required for LibreOffice compilation, in MB
-lo_configure_opts='--without-help --without-myspell-dicts --without-java --without-doxygen'
+lo_configure_opts='--without-help --without-myspell-dicts --without-java --without-doxygen --disable-cups --disable-dconf --disable-odk --without-junit --disable-dbus --disable-firebird-sdbc --disable-postgresql-sdbc --disable-gltf --disable-extensions --disable-pdfimport --disable-neon --disable-lpsolve --disable-coinmp --disable-systray --disable-randr --disable-gstreamer-1-0 --without-helppack-integration --disable-report-builder --disable-coinmp --disable-pdfium --disable-collada'
 lo_non_free_ttf=false # add Microsoft fonts to Ubuntu
 
 ### POCO parameters ###
