@@ -1,4 +1,4 @@
-# officeonline-install.sh
+# officeonline-install.sh v2.4.0
 ---
 Script intended to build & install Office Online on Ubuntu 16.04 and Debian 8.8 systems.
 
@@ -11,6 +11,8 @@ Written by: Marc C. & Subhi H.
 * [Requirements](#requirements)
 * [Notice](#notice)
 * [Default Installation](#default-installation)
+  * [Command line usage](#command-line-usage)
+  * [Configuration file](#configuration-file)
   * [Sets](#sets)
   * [Versions](#versions)
 * [Default Installation](#default-installation)
@@ -46,6 +48,59 @@ It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlin
 
 Your can manage your service using systemd: `systemctl start|stop|restart|status loolwsd.service`
 
+### Command line usage
+Since v2.4 the script accept the following usage:
+
+`officeonline-install.sh [-h][-c file|variable definition][-f lo|poco|lool][-l VERSION][-o COMMIT][-p VERSION]`
+
+- Options:
+  - `-c, --config /a/configuration/file|variable=value`
+
+      Load a script configuration file OR directly a variable and its value to override it
+      from the loaded configuration.
+      _This option can be repeated._
+
+  - `-f, --force lo|poco|lool`
+
+      Specify a component to build anyway.
+      Support some aliases for LibreOffice core and Libreoffice Online
+      _This option can be repeated._
+
+  - `-h, --help`
+
+      display this help and exit
+
+- Thoses options have been kept for backward compatibility and _may be removed in future releases_:
+
+  - `-l, --libreoffice_commit)=COMMIT`
+
+      Libreoffice COMMIT - short/full hash
+    **Equivalent of `-c lo_src_commit=COMMIT`**
+
+  - `-o, --libreoffice_online_commit)=COMMIT`
+
+      Libreoffice Online COMMIT - short/full hash.
+    __Equivalent of `-c lool_src_commit=COMMIT`__
+
+  - `-p, --poco_version)=VERSION`
+
+      Poco Version
+    __Equivalent of `-c poco_version=VERSION`__
+
+### Configuration file
+Since v2.4 the script search for an external configuration file that will override parts or all the default configuration.
+
+The script search for the file named `officeonline-install.cfg` in the following places in that order:
+1. The file specified from the command line with the `--config` option. It can be of any name.
+1. The __current working directory__ _except when it's the script's_ directory.
+2. The __user's home__ directory
+3. The __/etc/loolwsd/__ directory
+4. The __script's directory__
+
+Only the first file found is loaded.
+
+__INFO:__ A fully commented configuration file is in the script's directory available as a template or an example.
+
 ### Sets
 Since v2.1, it is possible to choose a **Set**.
 A set is an duo of branches from both LibreOffice core and online git repositories that are known to create a smooth LO-Online experience.
@@ -56,7 +111,7 @@ A set is an duo of branches from both LibreOffice core and online git repositori
 
 Its possible to pin exact version of the services used, like this:
 
-`./officeonline-install.sh -l 5.3.1.2 -o 47c01440ba794d2ea953d6ac1b80f7e42769f4e -p 1.7.8p2`
+`./officeonline-install.sh -l 5.3.1.2 -c lool_src_commit=47c01440ba794d2ea953d6ac1b80f7e42769f4e -c poco_version=1.7.8p2`
 
 There is also a help:
 
@@ -65,7 +120,7 @@ There is also a help:
 ## Idempotence
 This script has been made idempotent: Only the required action will be executed if it is run several times on the same System in order to get to the expected state.
 
-_Example_: when updating **LibreOffice** online to the latest version, **LibreOffice** compilation and installation steps will not be run as it is already installed.
+_Example_: when updating **LibreOffice online** to the latest version, **LibreOffice** compilation and installation steps will __not__ be run as it is already installed.
 
 ## Parameters
 These parameters describes the expected state of the system regarding LibreOffice Online installation.
@@ -83,7 +138,7 @@ Else, latest version available for each project will be used. _empty by default_
 For Idempotence, LO's status is defined by its sources' commit id.
 - `lo_dir`: The installation directory for _Lo_. _`/opt/online` by default_.
 - `lo_forcebuild`: A **boolean** to override idempotence and force *LibreOffice* compilation and installation. _`false` by default_.
-- `lo_configure_opts`: free form string to add even more options ! _`--without-help --without-myspell-dicts --without-java  --without-doxygen` by default_. **For experts only!**
+- `lo_configure_opts`: free form string to add even more options ! _`` by default_. **For experts only!**
 _Each update of the sources by the script will trigger a **lO** compilation & installation_
 - `lo_src_repo`: the Git repository _"https://github.com/LibreOffice/core.git"_
 - `lo_src_branch`: an existing branch name. It pull the latest Tag available _`master` by default_
@@ -129,7 +184,7 @@ The following parameters are options passed to the configuration script before c
 Can be enabled by adding `--enable-debug` to `lool_configure_opts` before compiling. Change filesystem allow="false" to "true" in /opt/online/loolwsd.xml
 
 ## Nota Bene
-- All the script's output is logged in the file `/tmp/YYYYMMDD-HHmm_officeonline.log`. where `YYYYMMDD-HHmm` is the date at the minute the script as been launched.
+- All the script's output is logged in the folder `$PWD/YYYYMMDD-HHmm_officeonline-install `. where `YYYYMMDD-HHmm` is the date at the minute the script as been launched.
 
 - `Maxdoc` & `Maxcon` are built-in limitations in WebSocket and intended to guarantee a good QoS and limit resources consumption on the host. *If you intend to change this parameters, take into account that __1 doc opened is around 20MB of RAM used.__*
 
