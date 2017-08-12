@@ -31,13 +31,14 @@ if [ "${DIST}" = "Debian" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
 fi
 
-if ! apt-get install sudo curl procps libegl1-mesa-dev libkrb5-dev systemd python-polib git libkrb5-dev make openssl g++ libtool ccache libpng12-0 libpng12-dev libpcap0.8 libpcap0.8-dev \
- libcunit1 libcunit1-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config wget libfontconfig1-dev graphviz \
- libcups2-dev gperf doxygen libxslt1-dev xsltproc libxml2-utils python-dev python3-dev libxt-dev libxrender-dev libxrandr-dev \
- uuid-runtime bison flex zip libgtk-3-dev libgtk2.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgl1-mesa-dev ant junit4 nasm \
- ${DIST_PKGS} -y; then
-   exit 1
- fi
+if ! apt-get install ant automake bison ccache curl doxygen flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev \ 
+libcppunit-doc libcunit1 libcunit1-dev libcups2-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgstreamer-plugins-base1.0-dev \ 
+libgstreamer1.0-dev libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libpng12-0 libpng12-dev libtool \ 
+libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 make nasm openssl pkg-config procps python-dev \ 
+python-polib python3-dev sudo systemd uuid-runtime wget xsltproc zip \
+  ${DIST_PKGS} -y; then
+    exit 1
+fi
 apt-get build-dep libreoffice -y
 
 if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
