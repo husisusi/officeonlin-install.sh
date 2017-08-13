@@ -182,8 +182,10 @@ The following parameters are options passed to the configuration script before c
 
 ## Debug
 Can be enabled by adding running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`
+
 or
-add --enable-debug to lool_configure_opts='' in officeonline-install.cfg before compiling. Don't forget to remove #
+
+add --enable-debug to lool_configure_opts='' in officeonline-install.cfg before compiling. Don't forget to remove the #
 
 Change filesystem allow="false" to "true" in /opt/online/loolwsd.xml
 
