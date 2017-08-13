@@ -181,7 +181,7 @@ The following parameters are options passed to the configuration script before c
 - `lool_configure_opts`: free form string to add even more options ! Empty by default_. **For experts only!**
 
 ## Debug
-Can be enabled by adding running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`
+Can be enabled by running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`
 
 or
 
