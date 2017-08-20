@@ -34,7 +34,7 @@ case $key in
       if [[ -f $2 ]]; then
         # shellcheck source=/project/officeonline-install.cfg
         opt_config_file="$2"
-      elif [[ "$2" = .*'='.* ]]; then
+      elif [[ "$2" =~ .*'='.* ]]; then
         # override ONE variable at a time
         # can be repeated
         # test if it is a variable with an = in it.
