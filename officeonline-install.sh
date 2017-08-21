@@ -21,6 +21,10 @@ ScriptFullPath="$(dirname "$(realpath $0)")"
 for mylibrary in $ScriptFullPath/lib/*.sh; do
 source "$mylibrary"
 done
+# fix for system coming without curl pre-installed
+if [ -z "$(for subpath in $(echo $PATH|tr ':' ' '); do ls $subpath/curl 2>/dev/null; done)" ]; then
+  apt-get install curl -y
+fi
 
 while [[ $# -gt 0 ]]
 do
@@ -30,7 +34,7 @@ case $key in
       if [[ -f $2 ]]; then
         # shellcheck source=/project/officeonline-install.cfg
         opt_config_file="$2"
-      elif [[ "$2" = .*'='.* ]]; then
+      elif [[ "$2" =~ .*'='.* ]]; then
         # override ONE variable at a time
         # can be repeated
         # test if it is a variable with an = in it.

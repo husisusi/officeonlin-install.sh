@@ -31,10 +31,10 @@ if [ "${DIST}" = "Debian" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
 fi
 
-if ! apt-get install ant automake bison ccache curl doxygen flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev \ 
-libcppunit-doc libcunit1 libcunit1-dev libcups2-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgstreamer-plugins-base1.0-dev \ 
-libgstreamer1.0-dev libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libpng12-0 libpng12-dev libtool \ 
-libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 make nasm openssl pkg-config procps python-dev \ 
+if ! apt-get install ant automake bison ccache doxygen flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev \
+libcppunit-doc libcunit1 libcunit1-dev libcups2-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgstreamer-plugins-base1.0-dev \
+libgstreamer1.0-dev libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libpng12-0 libpng12-dev libtool \
+libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 make nasm openssl pkg-config procps python-dev \
 python-polib python3-dev sudo systemd uuid-runtime wget xsltproc zip \
   ${DIST_PKGS} -y; then
     exit 1
