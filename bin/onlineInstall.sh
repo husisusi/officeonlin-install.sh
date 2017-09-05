@@ -12,9 +12,9 @@ chown lool:lool ${lool_logfile}
 ## create the hello-world file for test & demo
 # sudo -Hu lool cp ${lool_dir}/test/data/hello.odt ${lool_dir}/test/data/hello-world.odt
 
-if [ ! -f /lib/systemd/system/$loolwsd_service_filename.service ]; then
+if [ ! -f /lib/systemd/system/$loolwsd_service_name.service ]; then
   [ -z "$admin_pwd" ] && admin_pwd=$(randpass 10 0)
-  cat <<EOT > /lib/systemd/system/$loolwsd_service_filename.service
+  cat <<EOT > /lib/systemd/system/$loolwsd_service_name.service
 [Unit]
 Description=LibreOffice OnLine WebSocket Daemon
 After=network.target
@@ -43,6 +43,6 @@ if [ ! -f /etc/loolwsd/ca-chain.cert.pem ]; then
   chown lool:lool /etc/loolwsd/key.pem
   chmod 600 /etc/loolwsd/key.pem
 fi
-if [ ! -e /etc/systemd/system/$loolwsd_service_filename.service ]; then
-  ln /lib/systemd/system/$loolwsd_service_filename.service /etc/systemd/system/$loolwsd_service_filename.service
+if [ ! -e /etc/systemd/system/$loolwsd_service_name.service ]; then
+  ln /lib/systemd/system/$loolwsd_service_name.service /etc/systemd/system/$loolwsd_service_name.service
 fi
