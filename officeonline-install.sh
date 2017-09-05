@@ -155,12 +155,12 @@ source "$ScriptFullPath/bin/coreBuild.sh"
 } > >(tee -a ${log_dir}/Lool-compilation.log) 2> >(tee -a ${log_dir}/Lool-compilation.log >&2)
 ### Testing loolwsd ###
 if ${sh_interactive}; then
-  admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/loolwsd.service )
+  admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/$loolwsd_service_filename.service )
   dialog --backtitle "Information" \
   --title "Note" \
-  --msgbox "The installation logs are in ${log_dir}. After reboot you can use loolwsd.service using: systemctl (start,stop or status) loolwsd.service.\\n
-Your user is admin and password is $admin_pwd. Please change your user and/or password in (/lib/systemd/system/loolwsd.service),\\n
-after that run (systemctl daemon-reload && systemctl restart loolwsd.service).\\nPlease press OK and wait 15 sec. I will start the service." 10 145
+  --msgbox "The installation logs are in ${log_dir}. After reboot you can use $loolwsd_service_filename.service using: systemctl (start,stop or status) $loolwsd_service_filename.service.\\n
+Your user is admin and password is $admin_pwd. Please change your user and/or password in (/lib/systemd/system/$loolwsd_service_filename.service),\\n
+after that run (systemctl daemon-reload && systemctl restart $loolwsd_service_filename.service).\\nPlease press OK and wait 15 sec. I will start the service." 10 145
   clear
 fi
 {
