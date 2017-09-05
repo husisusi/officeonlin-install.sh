@@ -3,6 +3,8 @@ getFilesystem() {
   # function return the filesystem of a folder
   # arg 1 is an existing folder
   [ ! -d $1 ] || [ -L $1 ] &&  echo "error: $1 do not exists or is not a valid directory." >&2 && return 1
+  # test the used files system is not a temporary FS or else exit
+  df --output=fstype $1 | tail -1 | grep -qv tmpfs || echo "Error: $1 is not a valid filesystem" >&2 && return 1
   df --output=source $1 | tail -1
   return 0
 }
@@ -20,11 +22,6 @@ checkAvailableSpace() {
   [ $# -ne 2 ] && return 2
   local CompFs=$1
   local CompRequirement=$2
-  # check the arguments:
-  # Check if not in OpenVZ, /dev/simfs is a virtual device
-  if [ "${CompFs}" != "/dev/simfs" ]; then
-    [ ! -b ${CompFs} ] && echo "Error: ${CompFs} is not a valid filesystem" >&2 && return 2
-  fi
   availableMB=$(df -m --output=avail ${CompFs}|tail -1)
   if [ ${availableMB} -lt ${CompRequirement} ]; then
     echo "${CompFs}: FAILED"

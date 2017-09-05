@@ -8,9 +8,9 @@
 #### loolwsd & loleaflet Build ##
  # Idempotence : do not recompile loolwsd, install & test if already done
 if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
-  if [ ! -f /lib/systemd/system/$loolwsd_service_filename.service ]; then
-    admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/$loolwsd_service_filename.service )
-    rm /lib/systemd/system/$loolwsd_service_filename.service
+  if [ ! -f /lib/systemd/system/$loolwsd_service_name.service ]; then
+    admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/$loolwsd_service_name.service )
+    rm /lib/systemd/system/$loolwsd_service_name.service
   fi
   # leave if loowsd is already compiled and lool_forcebuild is not true.
   echo -e "Loolwsd is already in the expected state and I'm not forced to rebuild.\nLeaving here..."
