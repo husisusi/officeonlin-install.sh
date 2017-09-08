@@ -4,7 +4,10 @@ getFilesystem() {
   # arg 1 is an existing folder
   [ ! -d $1 ] || [ -L $1 ] &&  echo "error: $1 do not exists or is not a valid directory." >&2 && return 1
   # test the used files system is not a temporary FS or else exit
-  df --output=fstype $1 | tail -1 | grep -qv tmpfs || echo "Error: $1 is not a valid filesystem" >&2 && return 1
+  if ! df --output=fstype $1 | tail -1 | grep -qv tmpfs; then
+    echo "Error: $1 is not a valid filesystem" >&2
+    return 1
+  fi
   df --output=source $1 | tail -1
   return 0
 }
