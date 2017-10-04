@@ -18,6 +18,7 @@ Written by: Marc C. & Subhi H.
 * [Default Installation](#default-installation)
 * [Idempotence](#idempotence)
 * [Parameters](#parameters)
+  * [Global](#global-parameters)
   * [Sets](#set-parameters)
   * [LibreOffice](#libreoffice)
   * [Poco](#poco)
@@ -127,7 +128,12 @@ These parameters describes the expected state of the system regarding LibreOffic
 
 **The installation can be tuned to your needs by changing these variables.**
 
+### Global Parameters:
+Affect the whole build.
+- `distrib_name`: Set of build options for LibreOffice build. The distrib may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
+
 ### Set Parameters:
+Affect how the script chooses the best set of commits to use for core and online.
 - `set_name`: used to locate branchs folders in the libreoffice project. _'collabora' by default_
 - `set_core_regex`: regulax expression used to find the branch name for core _'cp-' by default._
 - `set_online_regex`: regulax expression used to find the branch name for online _'collabora-online' by default._
@@ -138,7 +144,7 @@ Else, latest version available for each project will be used. _empty by default_
 For Idempotence, LO's status is defined by its sources' commit id.
 - `lo_dir`: The installation directory for _Lo_. _`/opt/online` by default_.
 - `lo_forcebuild`: A **boolean** to override idempotence and force *LibreOffice* compilation and installation. _`false` by default_.
-- `lo_configure_opts`: free form string to add even more options ! _`` by default_. **For experts only!**
+- `lo_configure_opts`: comma separated list of build options. Added to the distro. _`` by default_. **For experts only!**
 _Each update of the sources by the script will trigger a **lO** compilation & installation_
 - `lo_src_repo`: the Git repository _"https://github.com/LibreOffice/core.git"_
 - `lo_src_branch`: an existing branch name. It pull the latest Tag available _`master` by default_
@@ -178,7 +184,7 @@ The following parameters are options passed to the configuration script before c
 - `lool_logfile`: `/var/log/loolwsd.log`
 - `lool_maxdoc`: Maximum number of _simultaneously_ opened documents for Lool. _`100` by default._
 - `lool_maxcon`: Maximum number of _simultaneously_ opened connections for Lool. _`200` by default._
-- `lool_configure_opts`: free form string to add even more options ! Empty by default_. **For experts only!**
+- `lool_configure_opts`: comma separated list of build options. Added to the distro. _Empty by default_. **For experts only!**
 
 ## Debug
 Can be enabled by running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`
