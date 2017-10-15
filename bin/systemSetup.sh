@@ -23,18 +23,29 @@ apt-get install lsb-release -y
 DIST=$(lsb_release -si)
 # RELEASE=`lsb_release -sr`
 
+CODENAME=$(lsb_release -c)
+CODENAME=`echo ${CODENAME##*:}`
+
 DIST_PKGS=""
 if [ "${DIST}" = "Ubuntu" ]; then
   DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
 fi
 if [ "${DIST}" = "Debian" ]; then
-  DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
+  if [ "${CODENAME}" = "stretch" ];then
+    DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
+    DIST_PKGS="${DIST_PKGS} libpng16.16"
+    DIST_PKGS="${DIST_PKGS} libpng-dev"
+  else
+    DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
+    DIST_PKGS="${DIST_PKGS} libpng12-0"
+    DIST_PKGS="${DIST_PKGS} libpng12-dev"
+  fi
 fi
 
 if ! apt-get install ant sudo systemd wget zip make procps automake bison ccache \
 flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev \
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev \
-libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libpng12-0 libpng12-dev libtool \
+libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool \
 libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl \
 pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc \
   ${DIST_PKGS} -y; then
