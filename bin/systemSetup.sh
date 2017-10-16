@@ -46,7 +46,7 @@ if ! apt-get install ant sudo systemd wget zip make procps automake bison ccache
 flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev \
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev \
 libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool \
-libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl \
+libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev \
 pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc \
   ${DIST_PKGS} -y; then
     exit 1
