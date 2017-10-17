@@ -2,6 +2,31 @@
 # shellcheck disable=SC2154
 ###############################################################################
 ############################# System preparation ##############################
+ssl_fix_dirty(){
+  local apt_file="/etc/apt/sources.list"
+  local deb_="deb http://ftp.be.debian.org/debian/ jessie-backports main"
+  local deb_src="deb-src http://ftp.be.debian.org/debian/ jessie-backports main"
+  local check_deb=`grep "$deb_" $apt_file | wc -l`
+  local check_deb_src=`grep "$deb_src" $apt_file | wc -l`
+
+  if [ "$check_deb" == "0" ];then
+    echo $deb_ >> $apt_file
+  fi
+  if [ "$check_deb_src" == "0" ];then
+    echo $deb_src >> $apt_file
+  fi
+
+  (
+    echo "Package: openssl libssl1.0.0 libssl-dev libssl-doc"
+    echo "Pin: release a=jessie-backports"
+    echo "Pin-Priority: 1001"
+  ) | tee /etc/apt/preferences.d/00_ssl
+  apt-get update
+  if ! apt-get install openssl libssl-dev -y --allow-downgrades; then
+    exit 1
+  fi
+}
+
 if [ -n "${set_name:?}" ]; then
   echo "Searching for a set named $set_name..."
   my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
@@ -32,6 +57,7 @@ if [ "${DIST}" = "Ubuntu" ]; then
 fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "stretch" ];then
+    ssl_fix_dirty
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
