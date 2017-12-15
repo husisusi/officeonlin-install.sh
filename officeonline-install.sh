@@ -12,6 +12,11 @@
 #You should have received a copy of the GNU General Public License along with
 #this program. If not, see http://www.gnu.org/licenses/.
 # shellcheck disable=SC2034,SC2154
+
+whendiditstopped() {
+  echo "Ended at $(date +'%Y-%m-%d %H:%M:%S')" >> ${log_dir}/timewatch.log
+}
+
 if [[ $(id -u) -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 ScriptFullPath="$(dirname "$(realpath $0)")"
 # shellcheck source=/project/lib/checksys.sh
@@ -95,6 +100,9 @@ elif [ -s "$ScriptFullPath/officeonline-install.cfg" ]; then
   # shellcheck source=/project/officeonline-install.cfg
   source "$ScriptFullPath/officeonline-install.cfg"
 fi
+###Added timewatch log file just to now when the script start and stop.
+echo "Started at $(date +'%Y-%m-%d %H:%M:%S')" > ${log_dir}/timewatch.log
+trap whendiditstopped EXIT
 
 # backward compatibility block :
 [ -n "$opt_lo_src_commit" ] && lo_src_commit="$opt_lo_src_commit"
