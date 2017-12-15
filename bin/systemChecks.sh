@@ -16,7 +16,7 @@ fi
 # find the target filesystem for each sw and add the required space for this FS
 # on an array BUT only if no build have been done yet.
 lo_fs=$(getFilesystem "$(dirname $lo_dir)") || exit 1
-poco_fs=$(getFilesystem "$(dirname $poco_dir)") || exit 1
+poco_fs=$(getFilesystem "$(dirname ${poco_dir:-poco_default_dir})") || exit 1
 lool_fs=$(getFilesystem "$(dirname $lool_dir)") || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
 #if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
