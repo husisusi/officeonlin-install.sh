@@ -4,7 +4,7 @@
 #####################
 #### loolwsd Installation ###
 make install
-mkdir -p /usr/local/var/cache/loolwsd && chown -R lool:lool /usr/local/var/cache/loolwsd
+mkdir -p "${lool_localstatedir}/cache/loolwsd" && chown -R lool:lool "${lool_localstatedir}/cache/loolwsd"
 
 # create log file for lool user
 [ -n "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
