@@ -100,9 +100,6 @@ elif [ -s "$ScriptFullPath/officeonline-install.cfg" ]; then
   # shellcheck source=/project/officeonline-install.cfg
   source "$ScriptFullPath/officeonline-install.cfg"
 fi
-###Added timewatch log file just to now when the script start and stop.
-echo "Started at $(date +'%Y-%m-%d %H:%M:%S')" > ${log_dir}/timewatch.log
-trap whendiditstopped EXIT
 
 # backward compatibility block :
 [ -n "$opt_lo_src_commit" ] && lo_src_commit="$opt_lo_src_commit"
@@ -127,6 +124,10 @@ touch ${log_dir}/preparation.log
 touch ${log_dir}/LO-compilation.log
 touch ${log_dir}/POCO-compilation.log
 touch ${log_dir}/Lool-compilation.log
+###Added timewatch log file just to now when the script start and stop.
+echo "Started at $(date +'%Y-%m-%d %H:%M:%S')" > ${log_dir}/timewatch.log
+trap whendiditstopped EXIT
+
 {
 # shellcheck source=/project/bin/systemChecks.sh
 source "$ScriptFullPath/bin/systemChecks.sh"
