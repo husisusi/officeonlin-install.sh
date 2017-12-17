@@ -130,7 +130,9 @@ These parameters describes the expected state of the system regarding LibreOffic
 
 ### Global Parameters:
 Affect the whole build.
-- `distrib_name`: Set of build options for LibreOffice build. The distrib may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
+- `distrib_name`: Used as an identifiers for the set of build options defined by the script and you. The distrib may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
+- `allowed_domains`: Space separated list of domains allowed to use the LibreOffice-Online service. __dots escaping is processed by the script__.
+  - __Note:__ Removing domains from the configuration file __is not supported__. Unwanted domains still need to be removed manually in the configuration file. `/etc/loolwsd/loolwsd.xml` _by default_.
 
 ### Set Parameters:
 Affect how the script chooses the best set of commits to use for core and online.
@@ -185,6 +187,9 @@ The following parameters are options passed to the configuration script before c
 - `lool_maxdoc`: Maximum number of _simultaneously_ opened documents for Lool. _`100` by default._
 - `lool_maxcon`: Maximum number of _simultaneously_ opened connections for Lool. _`200` by default._
 - `lool_configure_opts`: comma separated list of build options. Added to the distro. _Empty by default_. **For experts only!**
+- `lool_prefix`: The base directory from where the directory tree is generated. Used to install the application _'/usr' by default_
+- `lool_sysconfdir`: The base directory from where the application's is located _'/etc' by default_
+- `lool_localstatedir`: The base directory from where the application's state files are located. _'/var' by default_
 
 ## Debug
 Can be enabled by running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`

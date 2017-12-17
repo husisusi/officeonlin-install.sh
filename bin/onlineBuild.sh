@@ -34,6 +34,9 @@ cd ${lool_dir} || exit
 ${lool_forcebuild} && [ -f ${lool_dir}/configure ] && make clean uninstall
 sudo -Hu lool ./autogen.sh
 [ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
+[ -n "${lool_prefix}" ] && lool_configure_opts="${lool_configure_opts} --prefix=${lool_prefix}"
+[ -n "${lool_sysconfdir}" ] && lool_configure_opts="${lool_configure_opts} --sysconfdir=${lool_sysconfdir}"
+[ -n "${lool_localstatedir}" ] && lool_configure_opts="${lool_configure_opts} --localstatedir=${lool_localstatedir}"
 sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" || exit 4
 # loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 sudo -Hu lool make -j$cpu --directory=${lool_dir}
