@@ -59,7 +59,14 @@ SearchGitCommit() {
     fi
     #change the remote branch if needed and reset to latestCommit
     latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
-    [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
+    if [ "${myBranch}" != "${HeadBranch}" ]; then
+      if git branch -l| grep -q "${myBranch}"; then
+      echo "git checkout ${myBranch};"
+      else
+       echo "git checkout -t origin/${myBranch};"
+     fi
+       rcode=true
+    fi
     HeadBranch="$myBranch"
     # return 0
   fi
