@@ -83,11 +83,11 @@ SearchGitCommit() {
        # check if the Tag doesn't exist
        echo "Error: $myTag is not a valid Tag." >&2
        return 1
-     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Eq "tag:.*$myCommit"; then
+     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Eq "tag:.*$myTag"; then
        echo "Error: $myTag is not in branch $HeadBranch." >&2
        return 1
      fi
-    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myCommit"|awk '{print $1}')
+    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myTag"|awk '{print $1}')
     [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
