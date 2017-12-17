@@ -59,7 +59,14 @@ SearchGitCommit() {
     fi
     #change the remote branch if needed and reset to latestCommit
     latestCommit=$(git log -1 origin/${myBranch}| grep ^commit | awk '{print $NF}')
-    [ "${myBranch}" != "${HeadBranch}" ] && echo "git checkout ${myBranch};" && rcode=true
+    if [ "${myBranch}" != "${HeadBranch}" ]; then
+      if git branch -l| grep -q "${myBranch}"; then
+      echo "git checkout ${myBranch};"
+      else
+       echo "git checkout -t origin/${myBranch};"
+     fi
+       rcode=true
+    fi
     HeadBranch="$myBranch"
     # return 0
   fi
@@ -68,12 +75,12 @@ SearchGitCommit() {
       # check if the commit doesn't exist
       echo "Error: $myCommit is not a valid commit." >&2
       return 1
-    elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -q "$myCommit"; then
+    elif ! git log --pretty=oneline "origin/$HeadBranch" | grep -q "$myCommit"; then
       echo "Error: $myCommit is not in branch $HeadBranch." >&2
       return 1
     fi
     #find the commit's long hash from the short hash
-    myCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
+    myCommit=$(git log --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
     [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
@@ -83,11 +90,11 @@ SearchGitCommit() {
        # check if the Tag doesn't exist
        echo "Error: $myTag is not a valid Tag." >&2
        return 1
-     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Eq "tag:.*$myCommit"; then
+     elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Eq "tag:.*$myTag"; then
        echo "Error: $myTag is not in branch $HeadBranch." >&2
        return 1
      fi
-    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myCommit"|awk '{print $1}')
+    myTagCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -Em 1 "tag:.*$myTag"|awk '{print $1}')
     [ "${myTagCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myTagCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
