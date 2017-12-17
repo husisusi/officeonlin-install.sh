@@ -68,12 +68,12 @@ SearchGitCommit() {
       # check if the commit doesn't exist
       echo "Error: $myCommit is not a valid commit." >&2
       return 1
-    elif ! git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep -q "$myCommit"; then
+    elif ! git log --pretty=oneline "origin/$HeadBranch" | grep -q "$myCommit"; then
       echo "Error: $myCommit is not in branch $HeadBranch." >&2
       return 1
     fi
     #find the commit's long hash from the short hash
-    myCommit=$(git log --simplify-by-decoration --decorate --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
+    myCommit=$(git log --pretty=oneline "origin/$HeadBranch" | grep "$myCommit"|awk '{print $1}')
     [ "${myCommit}" != "${HeadCommit}" ] && echo "git reset --hard ${myCommit};" && rcode=true
     echo "repChanged=$rcode"
     return 0
