@@ -42,16 +42,18 @@ DistribFile(){
   case $action in
     create) DistribFile.Create $DistribFile;;
     delete) DistribFile.Delete $DistribFile;;
-    append) IFS=","; for parameter in $buildOpts; do
-      # remove opposite option from the file:
-      # if option disable-something, remove previous option enable-something and vice versa
-      # latest option win
-      if [ "disable" = "$(cut -d '-' -f1 <<<$parameter )" ]; then
-        DistribFile.Remove $DistribFile ${parameter//disable/enable}
-      elif [ "enable" = "$(cut -d '-' -f1 <<<$parameter )" ]; then
-        DistribFile.Remove $DistribFile ${parameter//enable/disable}
-      fi
-        DistribFile.Append $DistribFile $parameter
+    append) IFS=",";
+      for parameter in $buildOpts; do
+        # remove opposite options from the distribution:
+        # if option disable-something, remove previous option enable-something and vice versa
+        # latest option win
+        case "$(cut -d '-' -f1 <<<$parameter )" in
+          disable) DistribFile.Remove $DistribFile ${parameter//disable/enable};;
+          enable) DistribFile.Remove $DistribFile ${parameter//enable/disable};;
+          without) DistribFile.Remove $DistribFile ${parameter//without/with};;
+          with) DistribFile.Remove $DistribFile ${parameter//with/without};;
+        esac
+          DistribFile.Append $DistribFile $parameter
       done; IFS=" ";;
     remove) IFS=","; for parameter in $buildOpts; do
         DistribFile.Remove $DistribFile $parameter
