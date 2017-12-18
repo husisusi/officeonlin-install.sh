@@ -14,9 +14,11 @@ SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore 
   fi
   {
   cd ${lo_dir} || exit
-  ${lo_mini} && lo_configure_opts="${lo_configure_opts} ${lo_mini_opts}"
-  ${lo_forcebuild} && [ -f ${lo_dir}/configure ] && make clean uninstall
-  if ! sudo -Hu lool ./autogen.sh ${lo_configure_opts}; then exit 2; fi
+  DistribFile clear
+  DistribFile append $lo_configure_opts
+  ${lo_mini} && DistribFile append $lo_mini_opts
+  ${lo_forcebuild} && [ -f ${lo_dir}/configure ] && make clean
+  if ! sudo -Hu lool ./autogen.sh --with-distro=$distrib_name; then exit 2; fi
 
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
   # ${lo_forcebuild} && sudo -Hu lool make clean

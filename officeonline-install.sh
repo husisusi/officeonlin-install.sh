@@ -1,5 +1,5 @@
 #!/bin/bash
-#VERSION 2.4.0
+#VERSION 2.5.0
 #Written by: Subhi H. & Marc C.
 #Github Contributors: Aalaesar, Kassiematis, morph027
 #This script is free software: you can redistribute it and/or modify it under
@@ -12,6 +12,11 @@
 #You should have received a copy of the GNU General Public License along with
 #this program. If not, see http://www.gnu.org/licenses/.
 # shellcheck disable=SC2034,SC2154
+
+whendiditstopped() {
+  echo "Ended at $(date +'%Y-%m-%d %H:%M:%S')" >> ${log_dir}/timewatch.log
+}
+
 if [[ $(id -u) -ne 0 ]] ; then echo 'Please run me as root or "sudo ./officeonline-install.sh"' ; exit 1 ; fi
 ScriptFullPath="$(dirname "$(realpath $0)")"
 # shellcheck source=/project/lib/checksys.sh
@@ -119,6 +124,10 @@ touch ${log_dir}/preparation.log
 touch ${log_dir}/LO-compilation.log
 touch ${log_dir}/POCO-compilation.log
 touch ${log_dir}/Lool-compilation.log
+###Added timewatch log file just to now when the script start and stop.
+echo "Started at $(date +'%Y-%m-%d %H:%M:%S')" > ${log_dir}/timewatch.log
+trap whendiditstopped EXIT
+
 {
 # shellcheck source=/project/bin/systemChecks.sh
 source "$ScriptFullPath/bin/systemChecks.sh"
