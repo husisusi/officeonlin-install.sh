@@ -1,7 +1,9 @@
 #!/bin/bash
-# shellcheck disable=SC2154,SC2034
+# shellcheck disable=SC2154,SC2034,SC2068
 # create & manage the distribution file used for building LibreOffice Core && Online
 DistribFile(){
+  # usage:
+  # DistribFile [-n distribname][-f folder][-F file] action build_options...
   while [ $# -ne 1 ]; do
     case $1 in
       -n|--distribName) local DistribName=$2; shift 2;;
@@ -16,19 +18,42 @@ DistribFile(){
   if [ ! -f $DistribFile ]; then
     DistribFile.Create $DistribFile
   fi
-  action=$1; shift
+  local action=$1; shift
   while [ $# -ne 0 ]; do
-    if [ -z "$buildOpts" ]; then
-        local buildOpts="$1"; shift
+    IFS=','
+    myargs=($1)
+    IFS=" "
+    for myarg in ${myargs[@]}; do
+      # remove optionnal '--' in front of option name
+      if [ "--" = "${1:0:2}" ]; then
+        local myarg="${1:2}"
       else
-        local buildOpts="$buildOpts,$1"; shift
-    fi
+        local myarg="$1"
+      fi
+      # create a list, comma separated of all options
+      if [ -z "$buildOpts" ]; then
+          local buildOpts="$myarg"
+        else
+          local buildOpts="$buildOpts,$myarg"
+      fi
+    done
+    shift
   done
   case $action in
     create) DistribFile.Create $DistribFile;;
     delete) DistribFile.Delete $DistribFile;;
-    append) IFS=","; for parameter in $buildOpts; do
-        DistribFile.Append $DistribFile $parameter
+    append) IFS=",";
+      for parameter in $buildOpts; do
+        # remove opposite options from the distribution:
+        # if option disable-something, remove previous option enable-something and vice versa
+        # latest option win
+        case "$(cut -d '-' -f1 <<<$parameter )" in
+          disable) DistribFile.Remove $DistribFile ${parameter//disable/enable};;
+          enable) DistribFile.Remove $DistribFile ${parameter//enable/disable};;
+          without) DistribFile.Remove $DistribFile ${parameter//without/with};;
+          with) DistribFile.Remove $DistribFile ${parameter//with/without};;
+        esac
+          DistribFile.Append $DistribFile $parameter
       done; IFS=" ";;
     remove) IFS=","; for parameter in $buildOpts; do
         DistribFile.Remove $DistribFile $parameter
@@ -61,7 +86,7 @@ DistribFile.Create() {
 }
 
 DistribFile.Clear() {
-  if [ ! -f $1 ]; then
+  if [ -f $1 ]; then
     echo "" > $1
     return $?
   fi
