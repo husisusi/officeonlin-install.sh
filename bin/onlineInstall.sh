@@ -17,8 +17,10 @@ fi
 [ -n "$allowed_domains" ] && addwopihost "${lool_sysconfdir:-lool_prefix/etc}/loolwsd/loolwsd.xml" "$allowed_domains"
 
 # create log file for lool user
-[ -n "${lool_logfile}" ] && [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
-chown lool:lool ${lool_logfile}
+if [ -n "${lool_logfile}" ]; then
+  [ ! -f ${lool_logfile} ] && touch ${lool_logfile}
+  chown lool:lool ${lool_logfile}
+fi
 ## create the hello-world file for test & demo
 # sudo -Hu lool cp ${lool_dir}/test/data/hello.odt ${lool_dir}/test/data/hello-world.odt
 
