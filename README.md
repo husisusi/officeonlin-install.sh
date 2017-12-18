@@ -1,4 +1,4 @@
-# officeonline-install.sh v2.4.0
+# officeonline-install.sh v2.5.0
 ---
 Script intended to build & install Office Online on Ubuntu 16.04 and Debian 8.8 systems.
 
@@ -130,7 +130,7 @@ These parameters describes the expected state of the system regarding LibreOffic
 
 ### Global Parameters:
 Affect the whole build.
-- `distrib_name`: Used as an identifiers for the set of build options defined by the script and you. The distrib may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
+- `distrib_name`: A name for a list of build options for LibreOffice. The distribution is a file that may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
 - `allowed_domains`: Space separated list of domains allowed to use the LibreOffice-Online service. __dots escaping is processed by the script__.
   - __Note:__ Removing domains from the configuration file __is not supported__. Unwanted domains still need to be removed manually in the configuration file. `/etc/loolwsd/loolwsd.xml` _by default_.
 
