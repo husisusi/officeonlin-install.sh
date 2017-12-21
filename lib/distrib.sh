@@ -71,7 +71,7 @@ DistribFile.Append() {
 }
 
 DistribFile.Remove() {
-    sed -i "/^--$2$/d" $1
+    sed -i "/^--${2//\//\\\/}$/d" $1
 }
 
 DistribFile.Create() {
