@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154,SC2155
 ###############################################################################
 ############################# System preparation ##############################
 ssl_fix_dirty(){
@@ -73,7 +73,7 @@ flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential \
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev \
 libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool \
 libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev \
-pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc libcap2-bin \
+pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc libcap2-bin python-lxml \
   ${DIST_PKGS} -y; then
     exit 1
 fi
