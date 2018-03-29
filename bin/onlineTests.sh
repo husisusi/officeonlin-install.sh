@@ -10,6 +10,8 @@ if pgrep -u lool loolwsd; then
   pkill -u lool loolwsd
   systemctl enable $loolwsd_service_name.service
   systemctl daemon-reload
+  echo -e "\033[33;7m### Don't forget to take a look at your SSL cert in a year (or less). ###\033[0m"
+  ssl-cert-check -c /etc/loolwsd/cert.pem
 else
   echo -e "\033[33;5m### loolwsd is not running. Something went wrong :| Please look in ${log_dir} or try to restart your system ###\033[0m"
 fi
