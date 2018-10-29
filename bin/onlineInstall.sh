@@ -7,11 +7,11 @@ make install
 mkdir -p "${lool_localstatedir}/cache/loolwsd" && chown -R lool:lool "${lool_localstatedir}/cache/loolwsd"
 
 ### clean unwanted configuration files and add wopi host
-if [ -f /opt/online/loolwsd.xml ]; then
+if [ -f "${lool_dir}/loolwsd.xml" ]; then
   if [ ! -f ${lool_sysconfdir:-lool_prefix/etc}/loolwsd/loolwsd.xml ]; then
-    mv /opt/online/loolwsd.xml "${lool_sysconfdir:-lool_prefix/etc}/loolwsd/loolwsd.xml"
+    mv "${lool_dir}/loolwsd.xml" "${lool_sysconfdir:-lool_prefix/etc}/loolwsd/loolwsd.xml"
   else
-    rm /opt/online/loolwsd.xml
+    rm "${lool_dir}/loolwsd.xml"
   fi
 fi
 [ -n "$allowed_domains" ] && addwopihost "${lool_sysconfdir:-lool_prefix/etc}/loolwsd/loolwsd.xml" "$allowed_domains"
