@@ -10,6 +10,6 @@ poco_version_folder=$(grep -oiE '[0-9+]\.[0-9\.]{1,}[0-9]{1,}' <<<"${poco_versio
 if [ ! -d $poco_dir ]; then
   wget -c https://pocoproject.org/releases/poco-${poco_version_folder}/poco-${poco_version}-all.tar.gz -P "$(dirname $poco_dir)"/ || exit 3
   tar xf "$(dirname $poco_dir)"/poco-${poco_version}-all.tar.gz -C  "$(dirname $poco_dir)"/
-  rm -rf poco-*-all.tar.gz
+  rm -f poco*.tar.gz
   chown lool:lool $poco_dir -R
 fi
