@@ -57,7 +57,7 @@ if [ "${DIST}" = "Ubuntu" ]; then
 fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "stretch" ];then
-    ssl_fix_dirty
+    # ssl_fix_dirty no longer necessary
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
