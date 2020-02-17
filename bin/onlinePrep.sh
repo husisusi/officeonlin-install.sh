@@ -26,3 +26,8 @@ if ! npm -g list jake >/dev/null; then
   npm install -g npm
   npm install -g jake
 fi
+
+sed  '16a\
+#include <list>
+' < /opt/online/wsd/AdminModel.hpp > /opt/online/wsd/AdminModeltmp.hpp 
+cat /opt/online/wsd/AdminModeltmp.hpp > /opt/online/wsd/AdminModel.hpp
