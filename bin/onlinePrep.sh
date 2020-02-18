@@ -21,6 +21,7 @@ eval "$(SearchGitCommit $SearchGitOpts)"
 if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
   lool_forcebuild=true
 fi
+apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
 set +e
 if ! npm -g list jake >/dev/null; then
   npm install -g npm
