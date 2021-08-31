@@ -22,7 +22,7 @@ if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
   lool_forcebuild=true
 fi
 if [ "${DIST}" = "Debian" ]; then
-  if [ "${CODENAME}" = "buster" ];then
+  if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
     apt-get install  node-gyp libssl-dev npm libpococrypto60 -y
   else 
     apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
