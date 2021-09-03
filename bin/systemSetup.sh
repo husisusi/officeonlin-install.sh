@@ -61,6 +61,10 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
+  elif [ "${CODENAME}" = "Buster" ] || [ "${CODENAME}" = "bullseye" ];then
+    DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
+    DIST_PKGS="${DIST_PKGS} libpng16.16"
+    DIST_PKGS="${DIST_PKGS} libpng-dev"    
   else
     DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
     DIST_PKGS="${DIST_PKGS} libpng12-0"
@@ -82,9 +86,18 @@ if ! ${lo_mini}; then
 fi
 apt-get build-dep libreoffice -y
 
-if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
-  curl -sL https://deb.nodesource.com/setup_6.x | bash -
-  apt-get install nodejs -y
+if [ "${DIST}" = "Debian" ]; then
+    if [ "${CODENAME}" = "Buster" ] || [ "${CODENAME}" = "bullseye" ];then
+        apt-get install nodejs -y
+        curl https://www.npmjs.com/install.sh | sh
+        apt install python3-polib -y
+        npm install -g browserify
+    else
+        if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
+            curl -sL https://deb.nodesource.com/setup_6.x | bash -
+            apt-get install nodejs -y
+        fi
+    fi
 fi
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
