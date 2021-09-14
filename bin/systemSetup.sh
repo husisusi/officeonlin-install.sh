@@ -61,7 +61,7 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
-  elif [ "${CODENAME}" = "Buster" ] || [ "${CODENAME}" = "bullseye" ];then
+  elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
     DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"    
@@ -87,7 +87,7 @@ fi
 apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
-    if [ "${CODENAME}" = "Buster" ] || [ "${CODENAME}" = "bullseye" ];then
+    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
         apt-get install nodejs -y
         curl https://www.npmjs.com/install.sh | sh
         apt install python3-polib -y
