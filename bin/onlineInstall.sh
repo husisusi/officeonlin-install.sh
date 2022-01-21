@@ -4,6 +4,7 @@
 #####################
 #### coolwsd Installation ###
 make install
+mkdir /etc/coolwsd
 mkdir -p "${cool_localstatedir}/cache/coolwsd" && chown -R cool:cool "${cool_localstatedir}/cache/coolwsd"
 
 ### clean unwanted configuration files and add wopi host
