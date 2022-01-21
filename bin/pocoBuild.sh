@@ -1,15 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC2154
 # this script contains:
-## idempotent functions to define if Poco library has to be compiled
-## Installation of requirements for Poco build only
-## Download & install Poco Sources
-[ -z "$poco_version" ] && poco_version=$poco_version_latest
-[ -z "$poco_dir" ] && poco_dir="/opt/poco-${poco_version}-all"
-poco_version_folder=$(grep -oiE '[0-9+]\.[0-9\.]{1,}[0-9]{1,}' <<<"${poco_version}")
-if [ ! -d $poco_dir ]; then
-  wget -c https://pocoproject.org/releases/poco-${poco_version_folder}/poco-${poco_version}-all.tar.gz -P "$(dirname $poco_dir)"/ || exit 3
-  tar xf "$(dirname $poco_dir)"/poco-${poco_version}-all.tar.gz -C  "$(dirname $poco_dir)"/
-  rm -f poco*.tar.gz
-  chown cool:cool $poco_dir -R
+## configure script
+## build script
+## test if the poco library has already been compiled
+# (the dir size should be around 450000ko vs 65000ko when just extracted)
+# so let say arbitrary : do compilation when folder size is less than 100Mo
+if [ "$(du -s ${poco_dir} | awk '{print $1}')" -lt 100000 ] || ${poco_forcebuild}; then
+  cd "$poco_dir" || exit
+  sudo -Hu cool ./configure || exit 3
+  $poco_forcebuild && sudo -Hu cool make clean
+  sudo -Hu cool make -j${cpu} || exit 3
+  # poco take around 22/${cpu} minutes to compile on fast cpu
+  make install || exit 3
 fi
