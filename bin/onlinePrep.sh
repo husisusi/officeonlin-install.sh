@@ -6,23 +6,23 @@
 ## Download & install LibreOffice Online Sources
 set -e
 SearchGitOpts=''
-[ -n "${lool_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${lool_src_branch}"
-[ -n "${lool_src_commit}" ] && SearchGitOpts="${SearchGitOpts} -c ${lool_src_commit}"
-[ -n "${lool_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -t ${lool_src_tag}"
+[ -n "${cool_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${cool_src_branch}"
+[ -n "${cool_src_commit}" ] && SearchGitOpts="${SearchGitOpts} -c ${cool_src_commit}"
+[ -n "${cool_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -t ${cool_src_tag}"
 #### Download dependencies ####
-if [ -d ${lool_dir} ]; then
-  cd ${lool_dir}
+if [ -d ${cool_dir} ]; then
+  cd ${cool_dir}
 else
-  git clone ${lool_src_repo} ${lool_dir}
-  cd ${lool_dir}
+  git clone ${cool_src_repo} ${cool_dir}
+  cd ${cool_dir}
 fi
 declare repChanged
 eval "$(SearchGitCommit $SearchGitOpts)"
-if [ -f ${lool_dir}/loolwsd ] && $repChanged ; then
-  lool_forcebuild=true
+if [ -f ${cool_dir}/coolwsd ] && $repChanged ; then
+  cool_forcebuild=true
 fi
 if [ "${DIST}" = "Debian" ]; then
-  if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
+  if [ "${CODENAME}" = "bullseye" ];then
     apt-get install  node-gyp libssl-dev npm libpococrypto60 -y
   else 
     apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
@@ -39,5 +39,6 @@ fi
 
 sed  '16a\
 #include <list>
-' < /opt/online/wsd/AdminModel.hpp > /opt/online/wsd/AdminModeltmp.hpp 
-cat /opt/online/wsd/AdminModeltmp.hpp > /opt/online/wsd/AdminModel.hpp
+' < ${cool_dir}/wsd/AdminModel.hpp > ${cool_dir}/wsd/AdminModeltmp.hpp 
+cat ${cool_dir}/wsd/AdminModeltmp.hpp > ${cool_dir}/wsd/AdminModel.hpp
+
