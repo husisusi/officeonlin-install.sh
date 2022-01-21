@@ -22,5 +22,5 @@ eval "$(SearchGitCommit $SearchGitOpts)"
 if [ -d ${lo_dir}/instdir ] && $repChanged ; then
   lo_forcebuild=true
 fi
-chown -R lool:lool ${lo_dir}
+chown -R cool:cool ${lo_dir}
 set +e
