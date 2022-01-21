@@ -5,46 +5,53 @@
 ## build script
 #####################
 #####################
-#### loolwsd & loleaflet Build ##
- # Idempotence : do not recompile loolwsd, install & test if already done
-if [ -f ${lool_dir}/loolwsd ] && ! ${lool_forcebuild}; then
-  if [ ! -f /lib/systemd/system/$loolwsd_service_name.service ]; then
-    admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/$loolwsd_service_name.service )
-    rm /lib/systemd/system/$loolwsd_service_name.service
+#### coolwsd & loleaflet Build ##
+ # Idempotence : do not recompile coolwsd, install & test if already done
+if [ -f ${cool_dir}/coolwsd ] && ! ${cool_forcebuild}; then
+  if [ ! -f /lib/systemd/system/$coolwsd_service_name.service ]; then
+    admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/$coolwsd_service_name.service )
+    rm /lib/systemd/system/$coolwsd_service_name.service
   fi
-  # leave if loowsd is already compiled and lool_forcebuild is not true.
-  echo -e "Loolwsd is already in the expected state and I'm not forced to rebuild.\nLeaving here..."
+  # leave if loowsd is already compiled and cool_forcebuild is not true.
+  echo -e "coolwsd is already in the expected state and I'm not forced to rebuild.\nLeaving here..."
   exit 1
 fi
 
-### add temporary lool user to sudoers for loolwsd build ###
-# first check if lool group is in sudoers
+### add temporary cool user to sudoers for coolwsd build ###
+# first check if cool group is in sudoers
 # or in the includedir directory if it's used
-if [ -f /etc/sudoers ] && ! grep -q 'lool' /etc/sudoers; then
+if [ -f /etc/sudoers ] && ! grep -q 'cool' /etc/sudoers; then
   if ! grep -q '#includedir' /etc/sudoers; then
     #dirty modification
-    echo "%lool ALL=NOPASSWD:ALL" >> /etc/sudoers
+    echo "%cool ALL=NOPASSWD:ALL" >> /etc/sudoers
   else
     includedir=$(grep '#includedir' /etc/sudoers | awk '{print $NF}')
-    grep -qri '%lool' ${includedir} || echo "%lool ALL=NOPASSWD:ALL" >> ${includedir}/99_lool
+    grep -qri '%cool' ${includedir} || echo "%cool ALL=NOPASSWD:ALL" >> ${includedir}/99_cool
   fi
 fi
-chown lool:lool ${lool_dir} -R
-cd ${lool_dir} || exit
-${lool_forcebuild} && [ -f ${lool_dir}/configure ] && make clean uninstall
-sudo -Hu lool ./autogen.sh
-[ -n "${lool_logfile}" ] && lool_configure_opts="${lool_configure_opts} --with-logfile=${lool_logfile}"
-[ -n "${lool_prefix}" ] && lool_configure_opts="${lool_configure_opts} --prefix=${lool_prefix}"
-[ -n "${lool_sysconfdir}" ] && lool_configure_opts="${lool_configure_opts} --sysconfdir=${lool_sysconfdir}"
-[ -n "${lool_localstatedir}" ] && lool_configure_opts="${lool_configure_opts} --localstatedir=${lool_localstatedir}"
-sudo -Hu lool bash -c "./configure --enable-silent-rules --with-lokit-path=${lool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$lool_maxcon --with-max-documents=$lool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${lool_configure_opts}" || exit 4
-# loolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
-sudo -Hu lool make -j$cpu --directory=${lool_dir}
-_loolwsd_make_rc=${?} # get the make return code
-### remove lool group from sudoers
+chown cool:cool ${cool_dir} -R
+cd ${cool_dir} || exit
+${cool_forcebuild} && [ -f ${cool_dir}/configure ] && make clean uninstall
+sudo -Hu cool ./autogen.sh
+[ -n "${cool_logfile}" ] && cool_configure_opts="${cool_configure_opts} --with-logfile=${cool_logfile}"
+[ -n "${cool_prefix}" ] && cool_configure_opts="${cool_configure_opts} --prefix=${cool_prefix}"
+[ -n "${cool_sysconfdir}" ] && cool_configure_opts="${cool_configure_opts} --sysconfdir=${cool_sysconfdir}"
+[ -n "${cool_localstatedir}" ] && cool_configure_opts="${cool_configure_opts} --localstatedir=${cool_localstatedir}"
+
+echo ""
+echo ""
+echo "debug cool configure call: ./configure --enable-silent-rules --with-lokit-path=${cool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$cool_maxcon --with-max-documents=$cool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${cool_configure_opts}"
+echo ""
+echo ""
+
+sudo -Hu cool bash -c "./configure --enable-silent-rules --with-lokit-path=${cool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$cool_maxcon --with-max-documents=$cool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${cool_configure_opts}" || exit 4
+# coolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
+sudo -Hu cool make -j$cpu --directory=${cool_dir}
+_coolwsd_make_rc=${?} # get the make return code
+### remove cool group from sudoers
 if [ -f /etc/sudoers ]; then
-  sed -i '/^\%lool /d' /etc/sudoers
-  rm "$(grep -rl '%lool' ${includedir})"
+  sed -i '/^\%cool /d' /etc/sudoers
+  rm "$(grep -rl '%cool' ${includedir})"
 fi
 ##leave if make loowsd has failed
-[ ${_loolwsd_make_rc} -ne 0 ] && exit 4
+[ ${_coolwsd_make_rc} -ne 0 ] && exit 4
