@@ -61,7 +61,7 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
-  elif [ "${CODENAME}" = "bullseye" ];then
+elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
     DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
