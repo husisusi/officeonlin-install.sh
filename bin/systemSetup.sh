@@ -88,7 +88,7 @@ fi
 apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
-elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
+    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
 	apt-get install nodejs -y
 	curl https://www.npmjs.com/install.sh | sh
 	apt install python3-polib -y
