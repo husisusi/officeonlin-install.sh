@@ -4,6 +4,8 @@
 ## idempotent functions to define if LibreOffice Online has to be compiled
 ## Installation of requirements for Libreoffice Online build only
 ## Download & install LibreOffice Online Sources
+cp /usr/local/lib/libPocoCrypto.so.81 /usr/lib/
+cp /usr/local/lib/libPocoXML.so.81 /usr/lib/
 set -e
 SearchGitOpts=''
 [ -n "${cool_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${cool_src_branch}"
