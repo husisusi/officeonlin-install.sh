@@ -77,7 +77,7 @@ flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential lib
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgif-dev \
 libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool libpam0g-dev libpango1.0-dev \
 libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev librsvg2-dev \
-pkg-config python-dev python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev \
+pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc libcap2-bin python-lxml libcups2-dev \
 ${DIST_PKGS} -y; then
     exit 1
 fi
