@@ -25,7 +25,7 @@ if [ -f ${cool_dir}/coolwsd ] && $repChanged ; then
 fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "bullseye" ];then
-    apt-get install  node-gyp libssl-dev npm libpococrypto60 -y
+    apt-get install  node-gyp libssl-dev npm libpococrypto70 -y
   else 
     apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
   fi
@@ -35,7 +35,7 @@ fi
 
 set +e
 if ! npm -g list jake >/dev/null; then
-  npm install -g npm
+#  npm install -g npm
   npm install -g jake
 fi
 
