@@ -47,6 +47,11 @@ echo ""
 sudo -Hu cool bash -c "./configure --enable-silent-rules --with-lokit-path=${cool_dir}/bundled/include --with-lo-path=${lo_dir}/instdir --with-max-connections=$cool_maxcon --with-max-documents=$cool_maxdoc --with-poco-includes=/usr/local/include --with-poco-libs=/usr/local/lib ${cool_configure_opts}" || exit 4
 # coolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 sudo -Hu cool make -j$cpu --directory=${cool_dir}
+cd /opt/cool/browser
+npm shrinkwrap --dev
+npm install --save
+cd ${cool_dir}
+sudo -Hu cool make -j$cpu --directory=${cool_dir}
 _coolwsd_make_rc=${?} # get the make return code
 ### remove cool group from sudoers
 if [ -f /etc/sudoers ]; then
