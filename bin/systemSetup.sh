@@ -77,7 +77,7 @@ flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential lib
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgif-dev \
 libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool libpam0g-dev libpango1.0-dev \
 libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev librsvg2-dev \
-pkg-config python-dev python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev \
+pkg-config python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev \
 ${DIST_PKGS} -y; then
     exit 1
 fi
@@ -89,7 +89,11 @@ apt-get build-dep libreoffice -y
 if [ "${DIST}" = "Debian" ]; then
     if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
 	apt-get install nodejs -y
+	export npm_install="8.5.5"
 	curl https://www.npmjs.com/install.sh | sh
+#        npm install -g "npm@6.14.8"
+#	read -p "Press enter to continue"
+
 	apt install python3-polib -y
 	npm install -g browserify
     else
@@ -99,6 +103,8 @@ if [ "${DIST}" = "Debian" ]; then
 	fi
     fi
 fi
+#npm install -g npm@6.14.8
+#read -p "Press enter to continue"
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 apt-get install ttf-mscorefonts-installer -y
@@ -106,3 +112,4 @@ fi
 
 getent passwd cool || (useradd cool -G sudo; mkdir /home/cool)
 chown cool:cool /home/cool -R
+
