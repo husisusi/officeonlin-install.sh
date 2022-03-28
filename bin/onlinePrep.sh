@@ -24,7 +24,7 @@ if [ -f ${cool_dir}/coolwsd ] && $repChanged ; then
   cool_forcebuild=true
 fi
 if [ "${DIST}" = "Debian" ]; then
-  if [ "${CODENAME}" = "bullseye" ];then
+  if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
     apt-get install  node-gyp libssl-dev npm libpococrypto70 -y
   else 
     apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
