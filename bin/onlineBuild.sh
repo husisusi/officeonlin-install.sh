@@ -48,6 +48,11 @@ sudo -Hu cool bash -c "./configure --enable-silent-rules --with-lokit-path=${coo
 # coolwsd+loleaflet take around 8.5/${cpu} minutes to compile on fast cpu
 cd ${cool_dir}/browser
 cp npm-shrinkwrap.json.in npm-shrinkwrap.json
+npm cache clean --force
+npm install --update-binary --no-shrinkwrap
+npm audit fix
+npm audit fix --force
+npm fund
 npm shrinkwrap --dev
 npm install --save
 cd ${cool_dir}
