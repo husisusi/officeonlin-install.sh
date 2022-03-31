@@ -50,9 +50,7 @@ cd ${cool_dir}/browser
 cp npm-shrinkwrap.json.in npm-shrinkwrap.json
 npm cache clean --force
 npm install --update-binary --no-shrinkwrap
-npm audit fix
 npm audit fix --force
-npm fund
 npm shrinkwrap --dev
 npm install --save
 cd ${cool_dir}
