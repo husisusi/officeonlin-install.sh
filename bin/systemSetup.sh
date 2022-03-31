@@ -92,9 +92,6 @@ if [ "${DIST}" = "Debian" ]; then
 	apt-get install nodejs -y
 	export npm_install="8.5.5"
 	curl https://www.npmjs.com/install.sh | sh
-#        npm install -g "npm@6.14.8"
-#	read -p "Press enter to continue"
-
 	apt install python3-polib -y
 	npm install -g browserify
     else
@@ -104,8 +101,6 @@ if [ "${DIST}" = "Debian" ]; then
 	fi
     fi
 fi
-#npm install -g npm@6.14.8
-#read -p "Press enter to continue"
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 apt-get install ttf-mscorefonts-installer -y
