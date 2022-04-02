@@ -166,7 +166,7 @@ Poco is an opensource C++ library for network based project. It is required by L
 
 ### Cool
 Cool (Collabora Online) in a project to bring a opensource Office solution for web editing.
-- `cool_dir`: The installation directory for _Cool_. _`/opt/online` by default_.
+- `cool_dir`: The installation directory for _Cool_. _`/opt/cool` by default_.
 - `cool_forcebuild`: A **boolean** to override idempotence and force *LibreOffice Online* compilation and installation. _`false` by default_.
 #### Sources status:
 For Idempotence, Cool's status is defined by its sources' commit id.
