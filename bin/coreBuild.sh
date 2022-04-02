@@ -18,11 +18,11 @@ SO BE PATIENT PLEASE! ! You may see errors during the installation, just ignore 
   DistribFile append $lo_configure_opts
   ${lo_mini} && DistribFile append $lo_mini_opts
   ${lo_forcebuild} && [ -f ${lo_dir}/configure ] && make clean
-  if ! sudo -Hu lool ./autogen.sh --with-distro=$distrib_name; then exit 2; fi
+  if ! sudo -Hu cool ./autogen.sh --with-distro=$distrib_name; then exit 2; fi
 
   # libreoffice take around 8/${cpu} hours to compile on fast cpu.
-  # ${lo_forcebuild} && sudo -Hu lool make clean
-  if ! sudo -Hu lool make; then exit 2; fi
+  # ${lo_forcebuild} && sudo -Hu cool make clean
+  if ! sudo -Hu cool make; then exit 2; fi
   } > >(tee -a ${log_dir}/LO-compilation.log) 2> >(tee -a ${log_dir}/LO-compilation.log >&2)
 fi
 unset repChanged

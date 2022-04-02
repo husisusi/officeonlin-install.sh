@@ -52,7 +52,7 @@ case $key in
     # this option can be repeated
       case $2 in
         oo|lo|core|libreoffice|libre-office) opt_config_vars="$opt_config_vars lo_forcebuild=true" ;;
-        lool|online|loolwd|collabora) opt_config_vars="$opt_config_vars lool_forcebuild=true" ;;
+        cool|online|coolwd|collabora) opt_config_vars="$opt_config_vars cool_forcebuild=true" ;;
         poco) opt_config_vars="$opt_config_vars poco_forcebuild=true" ;;
       esac
     ;;
@@ -65,7 +65,7 @@ case $key in
     shift # past argument
     ;;
     -o|--libreoffice_online_commit)
-    opt_lool_src_commit="$2"
+    opt_cool_src_commit="$2"
     shift # past argument
     ;;
     -p|--poco_version)
@@ -93,9 +93,9 @@ elif [ "$ScriptFullPath" != "$PWD" ] && [ -s "$PWD/officeonline-install.cfg" ]; 
 elif [ -s "$HOME/officeonline-install.cfg" ]; then
   # shellcheck source=/project/officeonline-install.cfg
   source "$HOME/officeonline-install.cfg"
-elif [ -s "/etc/loolwsd/officeonline-install.cfg" ]; then
+elif [ -s "/etc/coolwsd/officeonline-install.cfg" ]; then
   # shellcheck source=/project/officeonline-install.cfg
-  source "/etc/loolwsd/officeonline-install.cfg"
+  source "/etc/coolwsd/officeonline-install.cfg"
 elif [ -s "$ScriptFullPath/officeonline-install.cfg" ]; then
   # shellcheck source=/project/officeonline-install.cfg
   source "$ScriptFullPath/officeonline-install.cfg"
@@ -103,7 +103,7 @@ fi
 
 # backward compatibility block :
 [ -n "$opt_lo_src_commit" ] && lo_src_commit="$opt_lo_src_commit"
-[ -n "$opt_lool_src_commit" ] && lool_src_commit="$opt_lool_src_commit"
+[ -n "$opt_cool_src_commit" ] && cool_src_commit="$opt_cool_src_commit"
 [ -n "$opt_poco_version" ] && poco_version="$opt_poco_version"
 # override using all variables given using the -c option
 if [ -n "$opt_config_vars" ]; then
@@ -123,7 +123,7 @@ mkdir -p ${log_dir}
 touch ${log_dir}/preparation.log
 touch ${log_dir}/LO-compilation.log
 touch ${log_dir}/POCO-compilation.log
-touch ${log_dir}/Lool-compilation.log
+touch ${log_dir}/cool-compilation.log
 ###Added timewatch log file just to now when the script start and stop.
 echo "Started at $(date +'%Y-%m-%d %H:%M:%S')" > ${log_dir}/timewatch.log
 trap whendiditstopped EXIT
@@ -153,7 +153,7 @@ source "$ScriptFullPath/bin/coreBuild.sh"
 } > >(tee -a ${log_dir}/POCO-compilation.log) 2> >(tee -a ${log_dir}/POCO-compilation.log >&2)
 
 ###############################################################################
-########################### loolwsd Installation ##############################
+########################### coolwsd Installation ##############################
 {
   # shellcheck source=/project/bin/onlinePrep.sh
   source "$ScriptFullPath/bin/onlinePrep.sh"
@@ -161,19 +161,19 @@ source "$ScriptFullPath/bin/coreBuild.sh"
   source "$ScriptFullPath/bin/onlineBuild.sh"
   # shellcheck source=/project/bin/onlineInstall.sh
   source "$ScriptFullPath/bin/onlineInstall.sh"
-} > >(tee -a ${log_dir}/Lool-compilation.log) 2> >(tee -a ${log_dir}/Lool-compilation.log >&2)
-### Testing loolwsd ###
+} > >(tee -a ${log_dir}/cool-compilation.log) 2> >(tee -a ${log_dir}/cool-compilation.log >&2)
+### Testing coolwsd ###
 if ${sh_interactive}; then
-  admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/${loolwsd_service_name}.service )
+  admin_pwd=$(awk -F'password=' '{printf $2}' /lib/systemd/system/${coolwsd_service_name}.service )
   dialog --backtitle "Information" \
   --title "Note" \
-  --msgbox "The installation logs are in ${log_dir}. After reboot you can use $loolwsd_service_name.service using: systemctl (start,stop or status) $loolwsd_service_name.service.\\n
-Your user is admin and password is $admin_pwd. Please change your user and/or password in (/lib/systemd/system/$loolwsd_service_name.service),\\n
-after that run (systemctl daemon-reload && systemctl restart $loolwsd_service_name.service).\\nPlease press OK and wait 15 sec. I will start the service." 10 145
+  --msgbox "The installation logs are in ${log_dir}. After reboot you can use $coolwsd_service_name.service using: systemctl (start,stop or status) $coolwsd_service_name.service.\\n
+Your user is admin and password is $admin_pwd. Please change your user and/or password in (/lib/systemd/system/$coolwsd_service_name.service),\\n
+after that run (systemctl daemon-reload && systemctl restart $coolwsd_service_name.service).\\nPlease press OK and wait 15 sec. I will start the service." 10 145
   clear
 fi
 {
   # shellcheck source=/project/bin/onlineTests.sh
   source "$ScriptFullPath/bin/onlineTests.sh"
-} > >(tee -a ${log_dir}/Lool-compilation.log) 2> >(tee -a ${log_dir}/Lool-compilation.log >&2)
+} > >(tee -a ${log_dir}/cool-compilation.log) 2> >(tee -a ${log_dir}/cool-compilation.log >&2)
 exit 0

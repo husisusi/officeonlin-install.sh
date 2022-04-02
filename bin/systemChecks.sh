@@ -17,9 +17,9 @@ fi
 # on an array BUT only if no build have been done yet.
 lo_fs=$(getFilesystem "$(dirname $lo_dir)") || exit 1
 poco_fs=$(getFilesystem "$(dirname ${poco_dir:-poco_default_dir})") || exit 1
-lool_fs=$(getFilesystem "$(dirname $lool_dir)") || exit 1
+cool_fs=$(getFilesystem "$(dirname $cool_dir)") || exit 1
 #here we use an array to store a relative number of FS and their respective required volume
-#if, like in the default, LO, poco & LOOL are all stored on the same FS, the value add-up
+#if, like in the default, LO, poco & cool are all stored on the same FS, the value add-up
 declare -A mountPointArray # declare associative array
 if [ ! -d ${lo_dir}/instdir ] ; then
   mountPointArray["$lo_fs"]=$((mountPointArray["$lo_fs"]+lo_req_vol))
@@ -27,8 +27,8 @@ fi
 if [ ! -d ${poco_dir} ] || [ "$(du -s ${poco_dir} | awk '{print $1}' 2>/dev/null)" -lt 100000 ]; then
   mountPointArray["$poco_fs"]=$((mountPointArray["$poco_fs"]+poco_req_vol))
 fi
-if [ ! -f ${lool_dir}/loolwsd ]; then
-  mountPointArray["$lool_fs"]=$((mountPointArray["$poco_fs"]+lool_req_vol))
+if [ ! -f ${cool_dir}/coolwsd ]; then
+  mountPointArray["$cool_fs"]=$((mountPointArray["$poco_fs"]+cool_req_vol))
 fi
 # test if each file system used have the required space.
 # if there's nothing to (force-)build (so 0 FS to verify), the script leave here.

@@ -29,10 +29,10 @@ ssl_fix_dirty(){
 
 if [ -n "${set_name:?}" ]; then
   echo "Searching for a set named $set_name..."
-  my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$lool_src_repo" "$set_online_regex" "$set_version")
+  my_set=$(FindOnlineSet "$set_name" "$lo_src_repo" "$set_core_regex" "$cool_src_repo" "$set_online_regex" "$set_version")
   if [ -n "$my_set" ]; then
     lo_src_branch=$(echo $my_set | awk '{print $1}') && echo "Core branch: $lo_src_branch"
-    lool_src_branch=$(echo $my_set | awk '{print $2}') && echo "Online branch: $lool_src_branch"
+    cool_src_branch=$(echo $my_set | awk '{print $2}') && echo "Online branch: $cool_src_branch"
   fi
 fi
 # run apt update && upgrade if last update is older than 1 day
@@ -61,10 +61,10 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
-  elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
+elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
     DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
-    DIST_PKGS="${DIST_PKGS} libpng-dev"    
+    DIST_PKGS="${DIST_PKGS} libpng-dev"
   else
     DIST_PKGS="${DIST_PKGS} openjdk-7-jdk"
     DIST_PKGS="${DIST_PKGS} libpng12-0"
@@ -73,11 +73,11 @@ if [ "${DIST}" = "Debian" ]; then
 fi
 
 if ! apt-get install ant sudo systemd wget zip make procps automake bison ccache \
-flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential \
-libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev \
-libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool libpam0g-dev \
-libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev \
-pkg-config python-dev python-polib python3-dev uuid-runtime xsltproc libcap2-bin python-lxml \
+flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential libcairo2-dev libjpeg-dev \
+libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgif-dev \
+libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool libpam0g-dev libpango1.0-dev \
+libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev librsvg2-dev \
+pkg-config python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev \
 ${DIST_PKGS} -y; then
     exit 1
 fi
@@ -88,15 +88,17 @@ apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
     if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
-        apt-get install nodejs -y
-        curl https://www.npmjs.com/install.sh | sh
-        apt install python3-polib -y
-        npm install -g browserify
+	curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -
+	apt-get install nodejs -y
+	export npm_install="8.5.5"
+	curl https://www.npmjs.com/install.sh | sh
+	apt install python3-polib -y
+	npm install -g browserify
     else
-        if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
-            curl -sL https://deb.nodesource.com/setup_6.x | bash -
-            apt-get install nodejs -y
-        fi
+	if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
+	    curl -sL https://deb.nodesource.com/setup_6.x | bash -
+	    apt-get install nodejs -y
+	fi
     fi
 fi
 if ${lo_non_free_ttf}; then
@@ -104,5 +106,6 @@ echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select tr
 apt-get install ttf-mscorefonts-installer -y
 fi
 
-getent passwd lool || (useradd lool -G sudo; mkdir /home/lool)
-chown lool:lool /home/lool -R
+getent passwd cool || (useradd cool -G sudo; mkdir /home/cool)
+chown cool:cool /home/cool -R
+
