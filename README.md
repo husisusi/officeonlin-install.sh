@@ -1,4 +1,4 @@
-# officeonline-install.sh v2.5.2
+# officeonline-install.sh v2.6.0
 ---
 Script intended to build & install Office Online on moderns Ubuntu and Debian systems.
 
@@ -22,7 +22,7 @@ Written by: Marc C. & Subhi H.
   * [Sets](#set-parameters)
   * [LibreOffice](#libreoffice)
   * [Poco](#poco)
-  * [Lool](#lool)
+  * [Cool](#cool)
     * [Sources status](#sources-status)
     * [Compilation options](#compilation-options)
 * [Debug](#debug)
@@ -47,12 +47,12 @@ You might see errors during the installation, just ignore them.
 
 It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlineOffice in `/opt/online`
 
-Your can manage your service using systemd: `systemctl start|stop|restart|status loolwsd.service`
+Your can manage your service using systemd: `systemctl start|stop|restart|status coolwsd.service`
 
 ### Command line usage
 Since v2.4 the script accept the following usage:
 
-`officeonline-install.sh [-h][-c file|variable definition][-f lo|poco|lool][-l VERSION][-o COMMIT][-p VERSION]`
+`officeonline-install.sh [-h][-c file|variable definition][-f lo|poco|cool][-l VERSION][-o COMMIT][-p VERSION]`
 
 - Options:
   - `-c, --config /a/configuration/file|variable=value`
@@ -61,7 +61,7 @@ Since v2.4 the script accept the following usage:
       from the loaded configuration.
       _This option can be repeated._
 
-  - `-f, --force lo|poco|lool`
+  - `-f, --force lo|poco|cool`
 
       Specify a component to build anyway.
       Support some aliases for LibreOffice core and Libreoffice Online
@@ -81,7 +81,7 @@ Since v2.4 the script accept the following usage:
   - `-o, --libreoffice_online_commit)=COMMIT`
 
       Libreoffice Online COMMIT - short/full hash.
-    __Equivalent of `-c lool_src_commit=COMMIT`__
+    __Equivalent of `-c cool_src_commit=COMMIT`__
 
   - `-p, --poco_version)=VERSION`
 
@@ -95,7 +95,7 @@ The script search for the file named `officeonline-install.cfg` in the following
 1. The file specified from the command line with the `--config` option. It can be of any name.
 1. The __current working directory__ _except when it's the script's_ directory.
 2. The __user's home__ directory
-3. The __/etc/loolwsd/__ directory
+3. The __/etc/coolwsd/__ directory
 4. The __script's directory__
 
 Only the first file found is loaded.
@@ -112,7 +112,7 @@ A set is an duo of branches from both LibreOffice core and online git repositori
 
 Its possible to pin exact version of the services used, like this:
 
-`./officeonline-install.sh -l 5.3.1.2 -c lool_src_commit=47c01440ba794d2ea953d6ac1b80f7e42769f4e -c poco_version=1.7.8p2`
+`./officeonline-install.sh -l 5.3.1.2 -c cool_src_commit=47c01440ba794d2ea953d6ac1b80f7e42769f4e -c poco_version=1.7.8p2`
 
 There is also a help:
 
@@ -132,7 +132,7 @@ These parameters describes the expected state of the system regarding LibreOffic
 Affect the whole build.
 - `distrib_name`: A name for a list of build options for LibreOffice. The distribution is a file that may be created from scratch and changed by the script _'LibreOfficeOnline' by default_
 - `allowed_domains`: Space separated list of domains allowed to use the LibreOffice-Online service. __dots escaping is processed by the script__.
-  - __Note:__ Removing domains from the configuration file __is not supported__. Unwanted domains still need to be removed manually in the configuration file. `/etc/loolwsd/loolwsd.xml` _by default_.
+  - __Note:__ Removing domains from the configuration file __is not supported__. Unwanted domains still need to be removed manually in the configuration file. `/etc/coolwsd/coolwsd.xml` _by default_.
 
 ### Set Parameters:
 Affect how the script chooses the best set of commits to use for core and online.
@@ -164,41 +164,41 @@ Poco is an opensource C++ library for network based project. It is required by L
 - `poco_forcebuild`: A **boolean** to override idempotence and force *POCO* compilation and installation. _`false` by default_.
 
 
-### Lool
-Lool (LibreOffice Online) in a project to bring a opensource Office solution for web editing.
-- `lool_dir`: The installation directory for _Lool_. _`/opt/online` by default_.
-- `lool_forcebuild`: A **boolean** to override idempotence and force *LibreOffice Online* compilation and installation. _`false` by default_.
+### Cool
+Cool (Collabora Online) in a project to bring a opensource Office solution for web editing.
+- `cool_dir`: The installation directory for _Cool_. _`/opt/online` by default_.
+- `cool_forcebuild`: A **boolean** to override idempotence and force *LibreOffice Online* compilation and installation. _`false` by default_.
 #### Sources status:
-For Idempotence, Lool's status is defined by its sources' commit id.
+For Idempotence, Cool's status is defined by its sources' commit id.
 
-_Each update of the sources by the script will trigger a **lool** compilation & installation_
-- the Git repository: `lool_src_repo` _"https://github.com/LibreOffice/online.git"_
+_Each update of the sources by the script will trigger a **cool** compilation & installation_
+- the Git repository: `cool_src_repo` _"https://github.com/LibreOffice/online.git"_
 - One of the 3:
-  - `lool_src_branch`: an existing branch name. It pull the latest commit available _`master` by default_
-  - `lool_src_commit`:  the id of a git commit. _`empty` by default_
-  - `lool_src_tag`: a tag in the git repository._`empty` by default_
+  - `cool_src_branch`: an existing branch name. It pull the latest commit available _`master` by default_
+  - `cool_src_commit`:  the id of a git commit. _`empty` by default_
+  - `cool_src_tag`: a tag in the git repository._`empty` by default_
 
 If more than one is defined, a choice is made:
 - _choice precedence_: **Commit** over **tag** over **branch**
 
 #### Compilation options:
 The following parameters are options passed to the configuration script before compilation.
-- `lool_logfile`: `/var/log/loolwsd.log`
-- `lool_maxdoc`: Maximum number of _simultaneously_ opened documents for Lool. _`100` by default._
-- `lool_maxcon`: Maximum number of _simultaneously_ opened connections for Lool. _`200` by default._
-- `lool_configure_opts`: comma separated list of build options. Added to the distro. _Empty by default_. **For experts only!**
-- `lool_prefix`: The base directory from where the directory tree is generated. Used to install the application _'/usr' by default_
-- `lool_sysconfdir`: The base directory from where the application's is located _'/etc' by default_
-- `lool_localstatedir`: The base directory from where the application's state files are located. _'/var' by default_
+- `cool_logfile`: `/var/log/coolwsd.log`
+- `cool_maxdoc`: Maximum number of _simultaneously_ opened documents for Cool. _`100` by default._
+- `cool_maxcon`: Maximum number of _simultaneously_ opened connections for Cool. _`200` by default._
+- `cool_configure_opts`: comma separated list of build options. Added to the distro. _Empty by default_. **For experts only!**
+- `cool_prefix`: The base directory from where the directory tree is generated. Used to install the application _'/usr' by default_
+- `cool_sysconfdir`: The base directory from where the application's is located _'/etc' by default_
+- `cool_localstatedir`: The base directory from where the application's state files are located. _'/var' by default_
 
 ## Debug
-Can be enabled by running `sudo ./officeonline-install.sh -c lool_configure_opts='--enable-debug' -f lool`
+Can be enabled by running `sudo ./officeonline-install.sh -c cool_configure_opts='--enable-debug' -f cool`
 
 or
 
-add --enable-debug to lool_configure_opts='' in officeonline-install.cfg before compiling. Don't forget to remove the #
+add --enable-debug to cool_configure_opts='' in officeonline-install.cfg before compiling. Don't forget to remove the #
 
-Change filesystem allow="false" to "true" in /opt/online/loolwsd.xml
+Change filesystem allow="false" to "true" in /opt/online/coolwsd.xml
 
 Enabling debug can pose a security risk. Use it only for testing.
 
