@@ -45,7 +45,7 @@ You should have received a copy of the GNU General Public License along with thi
 ## Default Installation
 You might see errors during the installation, just ignore them.
 
-It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlineOffice in `/opt/online`
+It will install libreoffice in `/opt/libreoffice`, Poco in `/opt/poco` and onlineOffice in `/opt/cool`
 
 Your can manage your service using systemd: `systemctl start|stop|restart|status coolwsd.service`
 
@@ -144,7 +144,7 @@ Else, latest version available for each project will be used. _empty by default_
 
 ### LibreOffice:
 For Idempotence, LO's status is defined by its sources' commit id.
-- `lo_dir`: The installation directory for _Lo_. _`/opt/online` by default_.
+- `lo_dir`: The installation directory for _Lo_. _`/opt/cool by default_.
 - `lo_forcebuild`: A **boolean** to override idempotence and force *LibreOffice* compilation and installation. _`false` by default_.
 - `lo_configure_opts`: comma separated list of build options. Added to the distro. _`` by default_. **For experts only!**
 _Each update of the sources by the script will trigger a **lO** compilation & installation_
@@ -198,7 +198,7 @@ or
 
 add --enable-debug to cool_configure_opts='' in officeonline-install.cfg before compiling. Don't forget to remove the #
 
-Change filesystem allow="false" to "true" in /opt/online/coolwsd.xml
+Change filesystem allow="false" to "true" in /opt/cool/coolwsd.xml
 
 Enabling debug can pose a security risk. Use it only for testing.
 
