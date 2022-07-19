@@ -88,9 +88,9 @@ apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
     if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
-	curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -
+	curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 	apt-get install nodejs -y
-	export npm_install="8.5.5"
+	export npm_install="8.14.0"
 	curl https://www.npmjs.com/install.sh | sh
 	apt install python3-polib -y
 	npm install -g browserify
@@ -108,4 +108,3 @@ fi
 
 getent passwd cool || (useradd cool -G sudo; mkdir /home/cool)
 chown cool:cool /home/cool -R
-
