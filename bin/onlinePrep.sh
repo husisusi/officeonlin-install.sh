@@ -15,7 +15,10 @@ SearchGitOpts=''
 if [ -d ${cool_dir} ]; then
   cd ${cool_dir}
 else
-  git clone ${cool_src_repo} ${cool_dir}
+  cd /opt
+  wget https://github.com/CollaboraOnline/online/archive/refs/tags/${cool_src_t>
+  tar -xzf ${cool_src_tag}.tar.gz
+  mv online-${cool_src_tag} cool
   cd ${cool_dir}
 fi
 declare repChanged
@@ -29,7 +32,7 @@ if [ "${DIST}" = "Debian" ]; then
   elif [ "${CODENAME}" = "buster" ]; then
     apt-get install  libssl-dev libpococrypto60 -y
   else 
-    apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
+    apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto80 -y
   fi
 else
   apt-get install nodejs node-gyp libssl-dev npm libpococrypto62 -y
