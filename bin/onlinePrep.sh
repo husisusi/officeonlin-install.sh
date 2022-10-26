@@ -16,7 +16,7 @@ if [ -d ${cool_dir} ]; then
   cd ${cool_dir}
 else
   cd /opt
-  wget https://github.com/CollaboraOnline/online/archive/refs/tags/${cool_src_t>
+  wget https://github.com/CollaboraOnline/online/archive/refs/tags/${cool_src_tag}.tar.gz
   tar -xzf ${cool_src_tag}.tar.gz
   mv online-${cool_src_tag} cool
   cd ${cool_dir}
