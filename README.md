@@ -1,4 +1,4 @@
-# officeonline-install.sh v2.6.1
+# officeonline-install.sh v2.6.2
 ---
 Script intended to build & install Office Online on moderns Ubuntu and Debian systems.
 
