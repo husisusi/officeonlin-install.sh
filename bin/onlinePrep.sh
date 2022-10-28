@@ -16,7 +16,6 @@ if [ -d ${cool_dir} ]; then
   cd ${cool_dir}
 else
   git clone ${cool_src_repo} ${cool_dir}
-  cd ${cool_dir}
 fi
 declare repChanged
 eval "$(SearchGitCommit $SearchGitOpts)"
@@ -29,7 +28,7 @@ if [ "${DIST}" = "Debian" ]; then
   elif [ "${CODENAME}" = "buster" ]; then
     apt-get install  libssl-dev libpococrypto60 -y
   else 
-    apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto50 -y
+    apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto80 -y
   fi
 else
   apt-get install nodejs node-gyp libssl-dev npm libpococrypto62 -y
