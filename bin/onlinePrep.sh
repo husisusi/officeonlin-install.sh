@@ -10,7 +10,7 @@ set -e
 SearchGitOpts=''
 [ -n "${cool_src_branch}" ] && SearchGitOpts="${SearchGitOpts} -b ${cool_src_branch}"
 [ -n "${cool_src_commit}" ] && SearchGitOpts="${SearchGitOpts} -c ${cool_src_commit}"
-[ -n "${cool_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -t ${cool_src_tag}"
+[ -n "${cool_src_tag}" ] && SearchGitOpts="${SearchGitOpts} -b ${cool_src_tag}"
 #### Download dependencies ####
 if [ -d ${cool_dir} ]; then
   cd ${cool_dir}
