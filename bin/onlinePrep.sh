@@ -17,11 +17,11 @@ if [ -d ${cool_dir} ]; then
 else
   git clone ${SearchGitOpts} --single-branch ${cool_src_repo} ${cool_dir}
 fi
-declare repChanged
-eval "$(SearchGitCommit $SearchGitOpts)"
-if [ -f ${cool_dir}/coolwsd ] && $repChanged ; then
-  cool_forcebuild=true
-fi
+#declare repChanged
+#eval "$(SearchGitCommit $SearchGitOpts)"
+#if [ -f ${cool_dir}/coolwsd ] && $repChanged ; then
+#  cool_forcebuild=true
+#fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "bullseye" ]; then
     apt-get install  libssl-dev libpococrypto70 -y
