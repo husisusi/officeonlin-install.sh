@@ -15,7 +15,7 @@ SearchGitOpts=''
 if [ -d ${cool_dir} ]; then
   cd ${cool_dir}
 else
-  git clone ${cool_src_repo} ${cool_dir}
+  git clone ${SearchGitOpts} --single-branch ${cool_src_repo} ${cool_dir}
 fi
 declare repChanged
 eval "$(SearchGitCommit $SearchGitOpts)"
