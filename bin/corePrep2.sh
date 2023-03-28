@@ -8,7 +8,7 @@ echo
 echo "Downloading Libre Office core assets (this might take a while) ..."
 mkdir ${lo_dir}
 cd ${lo_dir}
-wget https://github.com/CollaboraOnline/online/releases/download/for-code-assets/core-co-22.05-assets.tar.gz -q --show-progress
+wget https://github.com/CollaboraOnline/online/releases/download/for-code-assets/core-co-22.05-assets.tar.gz -q --show-progress --progress=bar:force
 chown -R cool:cool ${lo_dir}
 echo
 echo "Unpacking ..."
