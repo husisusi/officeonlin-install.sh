@@ -12,6 +12,6 @@ wget https://github.com/CollaboraOnline/online/releases/download/for-code-assets
 chown -R cool:cool ${lo_dir}
 echo
 echo "Unpacking ..."
-tar xvf core-co-22.05-assets.tar.gz
+tar xf core-co-22.05-assets.tar.gz
 rm core-co-22.05-assets.tar.gz
 set +e
