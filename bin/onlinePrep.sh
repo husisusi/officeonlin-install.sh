@@ -23,7 +23,7 @@ fi
 #  cool_forcebuild=true
 #fi
 if [ "${DIST}" = "Debian" ]; then
-  if [ "${CODENAME}" = "bullseye" ]; then
+  if [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ]; then
     apt-get install  libssl-dev libpococrypto70 -y
   elif [ "${CODENAME}" = "buster" ]; then
     apt-get install  libssl-dev libpococrypto60 -y

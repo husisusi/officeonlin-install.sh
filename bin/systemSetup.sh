@@ -61,8 +61,8 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
-elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
-    DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
+elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ];then
+    DIST_PKGS="${DIST_PKGS} openjdk-17-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
   else
@@ -90,7 +90,7 @@ if [ "${DIST}" = "Debian" ]; then
     if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
 	curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 	apt-get install nodejs -y
-	export npm_install="8.14.0"
+	export npm_install="9.7.1"
 	curl https://www.npmjs.com/install.sh | sh
 	apt install python3-polib -y
 	npm install -g browserify
