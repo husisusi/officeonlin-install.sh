@@ -53,7 +53,7 @@ CODENAME=`echo ${CODENAME##*:}`
 
 DIST_PKGS=""
 if [ "${DIST}" = "Ubuntu" ]; then
-  DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
+  DIST_PKGS="${DIST_PKGS} openjdk-19-jdk"
 fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "stretch" ];then
