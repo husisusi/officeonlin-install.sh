@@ -24,7 +24,7 @@ fi
 #fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ]; then
-    apt-get install  libssl-dev libpococrypto70 -y
+    apt-get install  libssl-dev libpococrypto80 -y
   elif [ "${CODENAME}" = "buster" ]; then
     apt-get install  libssl-dev libpococrypto60 -y
   else 
