@@ -87,7 +87,7 @@ fi
 apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
-    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
+    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ];;then
 	curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 	apt-get install nodejs -y
 	export npm_install="9.7.1"
