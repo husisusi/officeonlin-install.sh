@@ -2,7 +2,7 @@
 ---
 Script intended to build & install Office Online on moderns Ubuntu and Debian systems.
 
-Written by: Marc C. & Subhi H.
+Written by: Marc C., @DmDS & Subhi H.
 
 ----
 
