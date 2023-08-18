@@ -53,7 +53,7 @@ CODENAME=`echo ${CODENAME##*:}`
 
 DIST_PKGS=""
 if [ "${DIST}" = "Ubuntu" ]; then
-  DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
+  DIST_PKGS="${DIST_PKGS} openjdk-19-jdk"
 fi
 if [ "${DIST}" = "Debian" ]; then
   if [ "${CODENAME}" = "stretch" ];then
@@ -61,8 +61,8 @@ if [ "${DIST}" = "Debian" ]; then
     DIST_PKGS="${DIST_PKGS} openjdk-8-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
-elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
-    DIST_PKGS="${DIST_PKGS} openjdk-11-jdk"
+elif [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ];then
+    DIST_PKGS="${DIST_PKGS} openjdk-17-jdk"
     DIST_PKGS="${DIST_PKGS} libpng16.16"
     DIST_PKGS="${DIST_PKGS} libpng-dev"
   else
@@ -77,7 +77,7 @@ flex g++ git gperf graphviz junit4 libcap-dev libcppunit-dev build-essential lib
 libcppunit-doc libcunit1 libcunit1-dev libegl1-mesa-dev libfontconfig1-dev libgl1-mesa-dev libgif-dev \
 libgtk-3-dev libgtk2.0-dev libkrb5-dev libpcap0.8 libpcap0.8-dev libtool libpam0g-dev libpango1.0-dev \
 libxml2-utils libxrandr-dev libxrender-dev libxslt1-dev libxt-dev m4 nasm openssl libssl-dev librsvg2-dev \
-pkg-config python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev \
+pkg-config python3-polib python3-dev uuid-runtime xsltproc libcap2-bin python3-lxml libcups2-dev libzstd-dev\
 ${DIST_PKGS} -y; then
     exit 1
 fi
@@ -87,10 +87,10 @@ fi
 apt-get build-dep libreoffice -y
 
 if [ "${DIST}" = "Debian" ]; then
-    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ];then
+    if [ "${CODENAME}" = "buster" ] || [ "${CODENAME}" = "bullseye" ] || [ "${CODENAME}" = "bookworm" ];then
 	curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 	apt-get install nodejs -y
-	export npm_install="8.14.0"
+	export npm_install="9.7.1"
 	curl https://www.npmjs.com/install.sh | sh
 	apt install python3-polib -y
 	npm install -g browserify
