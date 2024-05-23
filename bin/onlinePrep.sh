@@ -32,7 +32,7 @@ if [ "${DIST}" = "Debian" ]; then
   fi
   else
 #  apt-get install nodejs node-gyp libssl-dev npm libpococrypto80 -y
-  apt-get install nodejs npm libssl-dev libpococrypto80 -y
+  apt-get install nodejs libssl-dev libpococrypto80 -y
 fi
 
 set +e
