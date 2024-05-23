@@ -105,6 +105,7 @@ fi
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 apt-get install ttf-mscorefonts-installer -y
+apt-get install fonts-crosextra-carlito fonts-crosextra-caladea -y
 fi
 
 getent passwd cool || (useradd cool -G sudo; mkdir /home/cool)
