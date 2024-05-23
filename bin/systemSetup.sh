@@ -102,6 +102,10 @@ if [ "${DIST}" = "Debian" ]; then
 	fi
     fi
 fi
+if [ "${DIST}" = "Ubuntu" ]; then
+       curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+       apt-get install nodejs -y
+fi
 if ${lo_non_free_ttf}; then
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 apt-get install ttf-mscorefonts-installer -y
