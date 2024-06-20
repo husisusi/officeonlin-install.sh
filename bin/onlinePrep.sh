@@ -27,11 +27,12 @@ if [ "${DIST}" = "Debian" ]; then
     apt-get install  libssl-dev libpococrypto80 -y
   elif [ "${CODENAME}" = "buster" ]; then
     apt-get install  libssl-dev libpococrypto60 -y
-  else 
+  else
     apt-get install nodejs-dev node-gyp libssl1.0-dev npm libpococrypto80 -y
   fi
-else
-  apt-get install nodejs node-gyp libssl-dev npm libpococrypto80 -y
+  else
+#  apt-get install nodejs node-gyp libssl-dev npm libpococrypto80 -y
+  apt-get install nodejs libssl-dev libpococrypto80 -y
 fi
 
 set +e
@@ -42,6 +43,5 @@ fi
 
 sed  '16a\
 #include <list>
-' < ${cool_dir}/wsd/AdminModel.hpp > ${cool_dir}/wsd/AdminModeltmp.hpp 
+' < ${cool_dir}/wsd/AdminModel.hpp > ${cool_dir}/wsd/AdminModeltmp.hpp
 cat ${cool_dir}/wsd/AdminModeltmp.hpp > ${cool_dir}/wsd/AdminModel.hpp
-
